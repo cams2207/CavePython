@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mon Chai - Gestion de Cave</title>
-    <!-- Tailwind CSS CDN + Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
     <script>
@@ -17,19 +16,10 @@
                     },
                     colors: {
                         wine: {
-                            50: '#FAF2F4',
-                            100: '#F5E4E8',
-                            200: '#EABEC7',
-                            500: '#A31B38',
-                            700: '#580C1E',
-                            800: '#3D0512',
-                            900: '#25020A',
+                            50: '#FAF2F4', 100: '#F5E4E8', 200: '#EABEC7', 500: '#A31B38', 700: '#580C1E', 800: '#3D0512', 900: '#25020A',
                         },
                         gold: {
-                            100: '#FDF7E7',
-                            300: '#EBD292',
-                            500: '#C89B3C',
-                            600: '#A87C24',
+                            100: '#FDF7E7', 300: '#EBD292', 500: '#C89B3C', 600: '#A87C24',
                         }
                     }
                 }
@@ -66,8 +56,6 @@
     </style>
 </head>
 <body class="min-h-screen pb-28">
-
-    <!-- Header Mobile Luxe -->
     <header class="sticky top-0 z-40 px-4 py-3.5 glass-nav border-b border-wine-200/10 flex justify-between items-center shadow-lg">
         <div class="flex items-center space-x-2.5">
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-wine-700 to-wine-500 flex items-center justify-center shadow-md shadow-wine-900/50 border border-gold-300/30">
@@ -78,15 +66,9 @@
                 <p class="text-[10px] text-gold-300/80 font-medium tracking-wide">Cave Sommelier</p>
             </div>
         </div>
-
-        {% if session.get('user_logged_in') %}
-        <a href="{{ url_for('logout') }}" class="text-xs bg-wine-500/20 text-gold-300 border border-gold-500/30 px-3 py-1.5 rounded-lg font-medium hover:bg-wine-500/40 transition">Déconnexion</a>
-        {% else %}
         <span class="text-[11px] bg-wine-800/80 text-wine-200 px-2.5 py-1 rounded-full border border-wine-500/20">Mode Test</span>
-        {% endif %}
     </header>
 
-    <!-- Messages Flash notifications -->
     <div class="max-w-md mx-auto mt-3 px-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -100,12 +82,10 @@
         {% endwith %}
     </div>
 
-    <!-- Contenu Principal -->
     <main class="max-w-md mx-auto px-4 mt-2">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Navigation tactile Bottom-Bar -->
     <nav class="fixed bottom-0 left-0 right-0 glass-nav shadow-2xl py-2 z-50">
         <div class="max-w-md mx-auto flex justify-around items-center">
             <a href="{{ url_for('index') }}" class="flex flex-col items-center py-1 px-2 rounded-xl transition {% if active_tab == 'dashboard' %}text-gold-300 font-bold scale-105{% else %}text-gray-400 hover:text-gray-200{% endif %}">

@@ -8,9 +8,10 @@
 
     <form action="{{ url_for('add_wine') }}" method="POST" class="glass-card p-4.5 rounded-2xl space-y-3.5 border border-wine-200/10 shadow-2xl">
         
+        <!-- REGION Saisie + Datelist Autocomplete -->
         <div>
-            <label class="block text-[11px] font-semibold text-gray-300 mb-1">Région</label>
-            <input list="regions_list" name="region" placeholder="Sélectionnez ou tapez..." class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white focus:border-gold-500" required>
+            <label class="block text-[11px] font-semibold text-gray-300 mb-1">🌍 Région</label>
+            <input list="regions_list" name="region" placeholder="Sélectionnez ou tapez une région..." class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white focus:border-gold-500" required>
             <datalist id="regions_list">
                 {% for r in regions %}
                 <option value="{{ r }}">
@@ -18,9 +19,10 @@
             </datalist>
         </div>
 
+        <!-- DOMAINE Saisie + Datelist Autocomplete -->
         <div>
-            <label class="block text-[11px] font-semibold text-gray-300 mb-1">Domaine / Château</label>
-            <input list="domaines_list" name="domaine" placeholder="Sélectionnez ou tapez..." class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white focus:border-gold-500" required>
+            <label class="block text-[11px] font-semibold text-gray-300 mb-1">🏛️ Domaine / Château</label>
+            <input list="domaines_list" name="domaine" placeholder="Sélectionnez ou tapez un domaine..." class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white focus:border-gold-500" required>
             <datalist id="domaines_list">
                 {% for d in domaines %}
                 <option value="{{ d }}">
@@ -28,33 +30,40 @@
             </datalist>
         </div>
 
+        <!-- NOM DE LA CUVEE Saisie + Datelist Autocomplete -->
         <div>
-            <label class="block text-[11px] font-semibold text-gray-300 mb-1">Nom du Vin / Appellation</label>
-            <input type="text" name="vin" placeholder="Ex: Grand Cru Classé, Cuvée Prestige..." class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white focus:border-gold-500" required>
+            <label class="block text-[11px] font-semibold text-gray-300 mb-1">🍾 Nom de la Cuvée / Appellation</label>
+            <input list="cuvees_list" name="vin" placeholder="Sélectionnez ou tapez une cuvée..." class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white focus:border-gold-500" required>
+            <datalist id="cuvees_list">
+                {% for c in cuvees %}
+                <option value="{{ c }}">
+                {% endfor %}
+            </datalist>
         </div>
 
+        <!-- FORMAT ANNÉES EN ENTIER (4 chiffres) -->
         <div class="grid grid-cols-3 gap-2">
             <div>
-                <label class="block text-[10px] font-semibold text-gray-300 mb-1">Millésime</label>
-                <input type="number" name="millesime" value="2020" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2 text-xs text-white text-center">
+                <label class="block text-[10px] font-semibold text-gray-300 mb-1">📅 Millésime</label>
+                <input type="number" name="millesime" value="2020" min="1900" max="2100" step="1" placeholder="Ex: 2020" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2 text-xs text-white text-center font-bold" required>
             </div>
             <div>
-                <label class="block text-[10px] font-semibold text-gray-300 mb-1">Boire Min</label>
-                <input type="number" name="boire_min" value="2024" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2 text-xs text-white text-center">
+                <label class="block text-[10px] font-semibold text-gray-300 mb-1">⏳ Boire Min</label>
+                <input type="number" name="boire_min" value="2024" min="1900" max="2100" step="1" placeholder="Ex: 2024" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2 text-xs text-white text-center font-bold" required>
             </div>
             <div>
-                <label class="block text-[10px] font-semibold text-gray-300 mb-1">Boire Max</label>
-                <input type="number" name="boire_max" value="2030" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2 text-xs text-white text-center">
+                <label class="block text-[10px] font-semibold text-gray-300 mb-1">⏳ Boire Max</label>
+                <input type="number" name="boire_max" value="2030" min="1900" max="2100" step="1" placeholder="Ex: 2030" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2 text-xs text-white text-center font-bold" required>
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
             <div>
-                <label class="block text-[11px] font-semibold text-gray-300 mb-1">Prix Unitaire (PU)</label>
+                <label class="block text-[11px] font-semibold text-gray-300 mb-1">💰 Prix Unitaire (PU)</label>
                 <input type="text" name="pu" placeholder="Ex: 35€" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white">
             </div>
             <div>
-                <label class="block text-[11px] font-semibold text-gray-300 mb-1">Statut</label>
+                <label class="block text-[11px] font-semibold text-gray-300 mb-1">🏷️ Statut</label>
                 <select name="statut" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-gold-300 font-bold focus:border-gold-500">
                     <option value="A boire">À boire</option>
                     <option value="Garde">Garde</option>
