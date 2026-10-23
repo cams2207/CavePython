@@ -6,7 +6,7 @@ import pandas as pd
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, session
 
 app = Flask(__name__)
-app.secret_key = "cave-secret-key"
+app.secret_key = "cave-secret-key-wow"
 
 DATA_FILE = "data_cave.csv"
 LOCATIONS_FILE = "locations.json"
@@ -29,20 +29,40 @@ DEFAULT_DOMAINES = [
 
 DEFAULT_LOCATIONS = ["Reste chez Fred", "Reste Appart", "Reste St Yorre"]
 
+def save_json(filename, data):
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def load_json(filename, default):
+    if os.path.exists(filename):
+        try:
+            with open(filename, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return default
+    return default
+
+def load_locations():
+    return load_json(LOCATIONS_FILE, DEFAULT_LOCATIONS)
+
+def load_regions():
+    return load_json(REGIONS_FILE, DEFAULT_REGIONS)
+
+def load_domaines():
+    return load_json(DOMAINES_FILE, DEFAULT_DOMAINES)
+
+def load_history():
+    return load_json(HISTORY_FILE, [])
+
 def init_files():
-    # Locations
     if not os.path.exists(LOCATIONS_FILE):
         save_json(LOCATIONS_FILE, DEFAULT_LOCATIONS)
-    # Regions
     if not os.path.exists(REGIONS_FILE):
         save_json(REGIONS_FILE, DEFAULT_REGIONS)
-    # Domaines
     if not os.path.exists(DOMAINES_FILE):
         save_json(DOMAINES_FILE, DEFAULT_DOMAINES)
-    # History
     if not os.path.exists(HISTORY_FILE):
         save_json(HISTORY_FILE, [])
-    # Initial Data CSV with sample wines if not present
     if not os.path.exists(DATA_FILE):
         locs = load_locations()
         columns = ["id", "Date", "Région", "Domaine", "Vin", "Millesime", "Boire Min", "Boire Max", "PU", "Statut"] + locs
@@ -60,36 +80,11 @@ def init_files():
             {
                 "id": 3, "Date": "2023-11-20", "Région": "Vallée du Rhône", "Domaine": "Domaine Guigal", 
                 "Vin": "Côte-Rôtie Château d'Ampuis", "Millesime": 2017, "Boire Min": 2024, "Boire Max": 2038, 
-                "PU": "110€", "Statut": "Garde", "Reste chez Fred": 3, "Reste Appart": 0, "Reste St Yorre": 2
+                "PU": "110€", "Statut": "Apogée", "Reste chez Fred": 3, "Reste Appart": 0, "Reste St Yorre": 2
             }
         ]
         df = pd.DataFrame(sample_data)
         df.to_csv(DATA_FILE, index=False)
-
-def load_json(filename, default):
-    if os.path.exists(filename):
-        try:
-            with open(filename, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            return default
-    return default
-
-def save_json(filename, data):
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-def load_locations():
-    return load_json(LOCATIONS_FILE, DEFAULT_LOCATIONS)
-
-def load_regions():
-    return load_json(REGIONS_FILE, DEFAULT_REGIONS)
-
-def load_domaines():
-    return load_json(DOMAINES_FILE, DEFAULT_DOMAINES)
-
-def load_history():
-    return load_json(HISTORY_FILE, [])
 
 def load_data():
     init_files()
@@ -130,7 +125,7 @@ def index():
         stock_reg = df_reg.groupby("Région")["Total_Qte"].sum().to_dict()
 
     history = load_history()
-    recent_bu = history[-5:][::-1]  # 5 derniers vins bus
+    recent_bu = history[-4:][::-1]
 
     return render_template('index.html', 
                            total_bouteilles=total_bouteilles, 
@@ -145,43 +140,93 @@ def stock():
     df = load_data()
     locations = load_locations()
     query = request.args.get('q', '').strip().lower()
-    
+    selected_region = request.args.get('region', '').strip()
+    selected_statut = request.args.get('statut', '').strip()
+
     wines = df.to_dict(orient='records')
     
-    # Global search filter
-    if query:
-        filtered_wines = []
-        for w in wines:
+    # Global search and filter
+    filtered_wines = []
+    for w in wines:
+        loc_sum = sum(float(w.get(l, 0) or 0) for l in locations)
+        w['total_qty'] = int(loc_sum)
+        
+        match_query = True
+        if query:
             searchable_text = f"{w.get('Région','')} {w.get('Domaine','')} {w.get('Vin','')} {w.get('Millesime','')} {w.get('Statut','')}".lower()
-            if query in searchable_text:
-                filtered_wines.append(w)
-        wines = filtered_wines
+            match_query = query in searchable_text
+            
+        match_region = True
+        if selected_region:
+            match_region = (w.get('Région') == selected_region)
 
-    return render_template('stock.html', wines=wines, locations=locations, query=query, active_tab='stock')
+        match_statut = True
+        if selected_statut:
+            match_statut = (w.get('Statut') == selected_statut)
 
-@app.route('/update_stock', methods=['POST'])
-def update_stock():
+        if match_query and match_region and match_statut:
+            filtered_wines.append(w)
+
+    regions = load_regions()
+    return render_template('stock.html', 
+                           wines=filtered_wines, 
+                           locations=locations, 
+                           regions=regions,
+                           query=query, 
+                           selected_region=selected_region,
+                           selected_statut=selected_statut,
+                           active_tab='stock')
+
+@app.route('/edit_wine/<int:wine_id>', methods=['GET', 'POST'])
+def edit_wine(wine_id):
     df = load_data()
     locations = load_locations()
-    
-    for idx in range(len(df)):
+    regions = load_regions()
+    domaines = load_domaines()
+
+    wine_row = df[df['id'] == wine_id]
+    if wine_row.empty:
+        flash("Vin introuvable.", "error")
+        return redirect(url_for('stock'))
+
+    idx = wine_row.index[0]
+
+    if request.method == 'POST':
+        df.loc[idx, 'Région'] = request.form.get('region', '')
+        df.loc[idx, 'Domaine'] = request.form.get('domaine', '')
+        df.loc[idx, 'Vin'] = request.form.get('vin', '')
+        df.loc[idx, 'Millesime'] = request.form.get('millesime', 2020)
+        df.loc[idx, 'Boire Min'] = request.form.get('boire_min', 2024)
+        df.loc[idx, 'Boire Max'] = request.form.get('boire_max', 2030)
+        df.loc[idx, 'PU'] = request.form.get('pu', '')
+        df.loc[idx, 'Statut'] = request.form.get('statut', 'A boire')
+
         for loc in locations:
-            val = request.form.get(f"loc_{idx}_{loc}")
-            if val is not None:
-                try:
-                    df.loc[idx, loc] = float(val)
-                except ValueError:
-                    pass
-                
+            try:
+                df.loc[idx, loc] = float(request.form.get(f"qty_{loc}", 0))
+            except ValueError:
+                df.loc[idx, loc] = 0.0
+
+        df.to_csv(DATA_FILE, index=False)
+        flash("Les modifications de la fiche ont été enregistrées !", "success")
+        return redirect(url_for('stock'))
+
+    wine_data = wine_row.iloc[0].to_dict()
+    return render_template('edit.html', wine=wine_data, locations=locations, regions=regions, domaines=domaines, active_tab='stock')
+
+@app.route('/delete_wine/<int:wine_id>', methods=['POST'])
+def delete_wine(wine_id):
+    df = load_data()
+    df = df[df['id'] != wine_id]
     df.to_csv(DATA_FILE, index=False)
-    flash("Stock mis à jour avec succès !", "success")
+    flash("Fiche de vin supprimée avec succès.", "success")
     return redirect(url_for('stock'))
 
 @app.route('/mark_bu', methods=['POST'])
 def mark_bu():
     wine_id = request.form.get("wine_id")
     loc = request.form.get("location")
-    rating = request.form.get("rating", "3")
+    rating = request.form.get("rating", "4")
     note = request.form.get("note", "")
     date_bu = request.form.get("date_bu", datetime.now().strftime("%Y-%m-%d"))
 
@@ -196,7 +241,6 @@ def mark_bu():
             df.loc[idx, loc] = current_qty - 1
             df.to_csv(DATA_FILE, index=False)
 
-            # Record in history
             history = load_history()
             history_entry = {
                 "id": len(history) + 1,
@@ -211,7 +255,7 @@ def mark_bu():
             }
             history.append(history_entry)
             save_json(HISTORY_FILE, history)
-            flash(f"Bouteille marquée comme bue (-1 à {loc}) et enregistrée dans l'historique !", "success")
+            flash(f"🎉 1 bouteille consommée ({loc}) ! Fiche mise à jour & ajoutée au carnet.", "success")
         else:
             flash(f"Aucune bouteille disponible dans l'emplacement {loc}.", "error")
             
@@ -219,7 +263,7 @@ def mark_bu():
 
 @app.route('/history')
 def history():
-    history_data = load_history()[::-1]  # du plus récent au plus ancien
+    history_data = load_history()[::-1]
     return render_template('history.html', history=history_data, active_tab='history')
 
 @app.route('/add', methods=['GET', 'POST'])
@@ -234,13 +278,12 @@ def add_wine():
         region = request.form.get("region", "")
         domaine = request.form.get("domaine", "")
 
-        # Auto-add new region/domain if missing
         if region and region not in regions:
             regions.append(region)
-            save_json(REGIONS_FILE, regions)
+            save_json(REGIONS_FILE, sorted(regions))
         if domaine and domaine not in domaines:
             domaines.append(domaine)
-            save_json(DOMAINES_FILE, domaines)
+            save_json(DOMAINES_FILE, sorted(domaines))
 
         new_id = int(df["id"].max() + 1) if not df.empty and "id" in df.columns else 1
         new_row = {
@@ -260,7 +303,7 @@ def add_wine():
             
         df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
         df.to_csv(DATA_FILE, index=False)
-        flash("Vin ajouté avec succès !", "success")
+        flash("Nouveau vin ajouté avec succès !", "success")
         return redirect(url_for('stock'))
         
     return render_template('add.html', locations=locations, regions=regions, domaines=domaines, active_tab='add')
@@ -284,9 +327,9 @@ def import_export():
                         imported_df[loc] = 0.0
                         
                 imported_df.to_csv(DATA_FILE, index=False)
-                flash(f"Import réussi depuis l'onglet '{sheet_name}' !", "success")
+                flash(f"Importation réussie depuis l'onglet '{sheet_name}' !", "success")
             except Exception as e:
-                flash(f"Erreur d'import : {e}", "error")
+                flash(f"Erreur lors de la lecture du fichier : {e}", "error")
     return render_template('import_export.html', active_tab='import')
 
 @app.route('/export_excel')

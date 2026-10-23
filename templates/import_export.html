@@ -1,22 +1,25 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="space-y-4">
-    <h2 class="text-2xl font-bold text-[#7D1242]">Import / Export Excel</h2>
-    
-    <div class="bg-white p-4 rounded-xl shadow-sm space-y-3">
-        <h3 class="font-bold text-sm text-gray-700">📤 Exporter la cave au format Excel</h3>
-        <p class="text-xs text-gray-500">Téléchargez toutes vos données à jour au format .xlsx.</p>
-        <a href="{{ url_for('export_excel') }}" class="block text-center bg-[#7D1242] text-white py-3 rounded-xl font-bold shadow-md">
+    <div>
+        <h2 class="font-serif text-2xl font-bold text-gradient">Import / Export</h2>
+        <p class="text-xs text-gray-400">Sauvegardes et synchronisation Excel</p>
+    </div>
+
+    <div class="glass-card p-4.5 rounded-2xl space-y-3 border border-wine-200/10">
+        <h3 class="font-bold text-xs text-gold-300 uppercase tracking-wider">📤 Exporter la cave</h3>
+        <p class="text-xs text-gray-300">Téléchargez vos données actuelles au format Excel (.xlsx).</p>
+        <a href="{{ url_for('export_excel') }}" class="block text-center bg-gradient-to-r from-gold-600 to-gold-500 text-wine-950 py-3 rounded-xl font-extrabold text-xs shadow-lg">
             📥 Télécharger Cave.xlsx
         </a>
     </div>
 
-    <div class="bg-white p-4 rounded-xl shadow-sm space-y-3">
-        <h3 class="font-bold text-sm text-gray-700">📥 Importer un fichier Excel</h3>
-        <p class="text-xs text-gray-500">Importez directement votre fichier. Seul l'onglet <strong>Cave</strong> sera lu.</p>
+    <div class="glass-card p-4.5 rounded-2xl space-y-3 border border-wine-200/10">
+        <h3 class="font-bold text-xs text-gold-300 uppercase tracking-wider">📥 Importer un fichier Excel</h3>
+        <p class="text-xs text-gray-300">Importez directement votre fichier Excel. L'onglet <strong>Cave</strong> sera chargé.</p>
         <form action="{{ url_for('import_export') }}" method="POST" enctype="multipart/form-data" class="space-y-3">
-            <input type="file" name="file" accept=".xlsx, .xls" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-[#7D1242] hover:file:bg-pink-100">
-            <button type="submit" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold shadow-md">
+            <input type="file" name="file" accept=".xlsx, .xls" class="w-full text-xs text-gray-300 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-wine-800 file:text-gold-300 hover:file:bg-wine-700">
+            <button type="submit" class="w-full bg-wine-800 border border-wine-500/30 text-white py-3 rounded-xl font-bold text-xs">
                 Valider l'importation
             </button>
         </form>

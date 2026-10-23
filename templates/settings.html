@@ -1,40 +1,41 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="space-y-4">
-    <h2 class="text-2xl font-bold text-[#7D1242]">Gestion & Paramètres</h2>
+    <div>
+        <h2 class="font-serif text-2xl font-bold text-gradient">Réglages</h2>
+        <p class="text-xs text-gray-400">Gestion des lieux de stockage, régions et domaines</p>
+    </div>
 
     <!-- EMPLACEMENTS -->
-    <div class="bg-white p-4 rounded-xl shadow-sm space-y-3">
-        <h3 class="font-bold text-sm text-gray-800">📍 Emplacements de stockage</h3>
+    <div class="glass-card p-4.5 rounded-2xl space-y-3 border border-wine-200/10">
+        <h3 class="font-bold text-xs text-gold-300 uppercase tracking-wider">📍 Emplacements de cave</h3>
         <form action="{{ url_for('settings') }}" method="POST" class="space-y-2">
             <input type="hidden" name="action" value="update_locations">
             {% for loc in locations %}
-            <div>
-                <input type="text" name="locations" value="{{ loc }}" class="w-full border rounded p-2 text-sm font-bold text-[#7D1242]">
-            </div>
+            <input type="text" name="locations" value="{{ loc }}" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white font-bold">
             {% endfor %}
-            <button type="submit" class="w-full bg-[#7D1242] text-white py-2 rounded-lg font-bold text-xs shadow-sm">
-                Enregistrer les emplacements
+            <button type="submit" class="w-full bg-gold-500/20 text-gold-300 border border-gold-500/30 py-2.5 rounded-xl font-bold text-xs">
+                Mettre à jour les emplacements
             </button>
         </form>
     </div>
 
     <!-- REGIONS -->
-    <div class="bg-white p-4 rounded-xl shadow-sm space-y-3">
-        <h3 class="font-bold text-sm text-gray-800">🌍 Liste des Régions</h3>
+    <div class="glass-card p-4.5 rounded-2xl space-y-3 border border-wine-200/10">
+        <h3 class="font-bold text-xs text-gold-300 uppercase tracking-wider">🌍 Régions viticoles</h3>
         <form action="{{ url_for('settings') }}" method="POST" class="flex space-x-2">
             <input type="hidden" name="action" value="add_region">
-            <input type="text" name="new_region" placeholder="Nouvelle région..." class="w-full border rounded p-2 text-sm" required>
-            <button type="submit" class="bg-[#7D1242] text-white px-3 rounded-lg font-bold text-xs">Ajouter</button>
+            <input type="text" name="new_region" placeholder="Nouvelle région..." class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2 text-xs text-white" required>
+            <button type="submit" class="bg-gold-500 text-wine-950 px-3 py-2 rounded-xl font-bold text-xs">Ajouter</button>
         </form>
-        <div class="flex flex-wrap gap-1.5 pt-2">
+        <div class="flex flex-wrap gap-1.5 pt-1">
             {% for r in regions %}
-            <span class="inline-flex items-center text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full border border-gray-200">
+            <span class="inline-flex items-center text-[11px] bg-wine-900/60 text-gray-200 px-2.5 py-1 rounded-lg border border-wine-500/20">
                 {{ r }}
                 <form action="{{ url_for('settings') }}" method="POST" class="inline ml-1.5">
                     <input type="hidden" name="action" value="delete_region">
                     <input type="hidden" name="region_name" value="{{ r }}">
-                    <button type="submit" class="text-red-500 font-bold hover:text-red-700">×</button>
+                    <button type="submit" class="text-red-400 font-bold">×</button>
                 </form>
             </span>
             {% endfor %}
@@ -42,26 +43,25 @@
     </div>
 
     <!-- DOMAINES -->
-    <div class="bg-white p-4 rounded-xl shadow-sm space-y-3">
-        <h3 class="font-bold text-sm text-gray-800">🏛️ Liste des Domaines</h3>
+    <div class="glass-card p-4.5 rounded-2xl space-y-3 border border-wine-200/10">
+        <h3 class="font-bold text-xs text-gold-300 uppercase tracking-wider">🏛️ Domaines / Châteaux</h3>
         <form action="{{ url_for('settings') }}" method="POST" class="flex space-x-2">
             <input type="hidden" name="action" value="add_domaine">
-            <input type="text" name="new_domaine" placeholder="Nouveau domaine..." class="w-full border rounded p-2 text-sm" required>
-            <button type="submit" class="bg-[#7D1242] text-white px-3 rounded-lg font-bold text-xs">Ajouter</button>
+            <input type="text" name="new_domaine" placeholder="Nouveau domaine..." class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2 text-xs text-white" required>
+            <button type="submit" class="bg-gold-500 text-wine-950 px-3 py-2 rounded-xl font-bold text-xs">Ajouter</button>
         </form>
-        <div class="flex flex-wrap gap-1.5 pt-2">
+        <div class="flex flex-wrap gap-1.5 pt-1">
             {% for d in domaines %}
-            <span class="inline-flex items-center text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full border border-gray-200">
+            <span class="inline-flex items-center text-[11px] bg-wine-900/60 text-gray-200 px-2.5 py-1 rounded-lg border border-wine-500/20">
                 {{ d }}
                 <form action="{{ url_for('settings') }}" method="POST" class="inline ml-1.5">
                     <input type="hidden" name="action" value="delete_domaine">
                     <input type="hidden" name="domaine_name" value="{{ d }}">
-                    <button type="submit" class="text-red-500 font-bold hover:text-red-700">×</button>
+                    <button type="submit" class="text-red-400 font-bold">×</button>
                 </form>
             </span>
             {% endfor %}
         </div>
     </div>
-
 </div>
 {% endblock %}
