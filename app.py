@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import pandas as pd
@@ -5,39 +6,72 @@ import streamlit as st
 
 # Configuration de la page
 st.set_page_config(
-    page_title="Ma Cave à Vin",
+    page_title="Gestion de Cave à Vin",
     page_icon="🍷",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# --- DESIGN & CSS PERSONNALISÉ POUR UNE INTERFACE ULTRA PROPRE ---
+# --- DESIGN & CSS "VRAIE APPLICATION" ---
 st.markdown(
     """
     <style>
+    /* Masquer le menu Streamlit et le footer par défaut */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+
+    /* Style global de l'application */
     .main {
-        background-color: #f8f9fa;
+        background-color: #f4f6f8;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
-    .stMetric {
-        background-color: #ffffff;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
+
+    /* En-têtes de page */
     h1, h2, h3 {
-        color: #581845;
+        color: #4A0E17;
+        font-weight: 700;
     }
+
+    /* Cartes de statistiques / métriques */
+    .metric-card {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border-left: 5px solid #7D1242;
+        margin-bottom: 15px;
+    }
+
+    /* Boutons personnalisés */
     .stButton>button {
-        background-color: #7d1242;
+        background-color: #7D1242;
         color: white;
         border-radius: 8px;
         border: none;
-        padding: 10px 20px;
-        font-weight: bold;
+        padding: 10px 24px;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
     }
     .stButton>button:hover {
-        background-color: #581845;
+        background-color: #5A0D30;
         color: white;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Style de la sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #2C0B14;
+        color: white;
+    }
+    section[data-testid="stSidebar"] .stRadio label {
+        color: white !important;
+        font-size: 16px;
+        padding: 5px 0;
+    }
+    section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] span {
+        color: #E6C280 !important;
     }
     </style>
 """,
@@ -46,7 +80,7 @@ st.markdown(
 
 DATA_FILE = "data_cave.csv"
 LOCATIONS_FILE = "locations.json"
-CREDENTIALS = {"admin": "cave2026"}  # Identifiants de connexion
+CREDENTIALS = {"admin": "cave2026"}  # Identifiants modifiables ici
 
 # --- AUTHENTIFICATION ---
 if "authenticated" not in st.session_state:
@@ -54,19 +88,21 @@ if "authenticated" not in st.session_state:
 
 if not st.session_state["authenticated"]:
     st.markdown(
-        "<br><br><h1 style='text-align: center; color: #7d1242;'>🍷 Gestion de Cave à Vin</h1>",
+        "<br><br><h1 style='text-align: center; color: #4A0E17;'>🍷 Ma Cave à Vin</h1>",
         unsafe_allow_html=True,
     )
     st.markdown(
-        "<p style='text-align: center; color: #666;'>Veuillez vous connecter pour accéder à votre cave.</p>",
+        "<p style='text-align: center; color: #666; font-size: 18px;'>Espace de gestion sécurisé</p><br>",
         unsafe_allow_html=True,
     )
 
-    col1, col2, col3 = st.columns([1, 1.5, 1])
+    col1, col2, col3 = st.columns([1, 1.2, 1])
     with col2:
         with st.form("login_form"):
-            username = st.text_input("Identifiant")
-            password = st.text_input("Mot de passe", type="password")
+            username = st.text_input("Identifiant", placeholder="Entrez votre ID")
+            password = st.text_input(
+                "Mot de passe", type="password", placeholder="••••••••"
+            )
             submitted = st.form_submit_button("Se connecter", use_container_width=True)
             if submitted:
                 if (
@@ -125,45 +161,62 @@ def load_data():
 
 df = load_data()
 
-# --- BARRE LATÉRALE DE NAVIGATION ---
-st.sidebar.title("🍾 Ma Cave à Vin")
+# --- BARRE LATÉRALE DE NAVIGATION (DESIGN APP) ---
+st.sidebar.markdown(
+    "<h2 style='text-align: center; color: #E6C280;'>🍾 Mon Chai</h2>",
+    unsafe_allow_html=True,
+)
 st.sidebar.markdown("---")
 menu = st.sidebar.radio(
     "Navigation",
     [
-        "📊 Tableau de bord & Stats",
-        "📥 Gestion de la Cave",
+        "📊 Tableau de bord",
+        "📥 Gestion du Stock",
         "➕ Ajouter / Importer",
-        "⚙️ Paramètres & Emplacements",
+        "⚙️ Paramètres",
     ],
 )
 
-st.sidebar.markdown("---")
+st.sidebar.markdown("<br><br><br>", unsafe_allow_html=True)
 if st.sidebar.button("🔓 Déconnexion", use_container_width=True):
     st.session_state["authenticated"] = False
     st.rerun()
 
 
 # --- 1. TABLEAU DE BORD & STATS ---
-if menu == "📊 Tableau de bord & Stats":
-    st.title("📊 Tableau de Bord et Statistiques")
-    st.write(
-        "Vue d'ensemble de votre patrimoine viticole et de sa répartition."
-    )
+if menu == "📊 Tableau de bord":
+    st.title("📊 Tableau de Bord")
+    st.write("Indicateurs clés et synthèse de votre cave.")
 
     loc_cols = [c for c in locations if c in df.columns]
     df_locs = df[loc_cols].apply(pd.to_numeric, errors="coerce").fillna(0)
     total_bouteilles = int(df_locs.values.sum())
     total_references = len(df)
 
-    # Affichage des métriques stylisées
+    # Cartes métriques épurées
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("📦 Références de vins", total_references)
+        st.markdown(
+            f"""
+            <div class="metric-card">
+                <h3 style="margin:0; color:#555; font-size:16px;">Références de Vins</h3>
+                <p style="margin:5px 0 0 0; font-size:32px; font-weight:bold; color:#7D1242;">{total_references}</p>
+            </div>
+        """,
+            unsafe_allow_html=True,
+        )
     with col2:
-        st.metric("🍾 Total des bouteilles", total_bouteilles)
+        st.markdown(
+            f"""
+            <div class="metric-card">
+                <h3 style="margin:0; color:#555; font-size:16px;">Total Bouteilles en Stock</h3>
+                <p style="margin:5px 0 0 0; font-size:32px; font-weight:bold; color:#7D1242;">{total_bouteilles}</p>
+            </div>
+        """,
+            unsafe_allow_html=True,
+        )
 
-    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
     col_a, col_b = st.columns(2)
 
     with col_a:
@@ -172,7 +225,7 @@ if menu == "📊 Tableau de bord & Stats":
         if not loc_totals.empty and loc_totals.sum() > 0:
             st.bar_chart(loc_totals)
         else:
-            st.info("Aucune donnée d'emplacement disponible.")
+            st.info("Aucune donnée d'emplacement.")
 
     with col_b:
         st.subheader("🌍 Stock par Région")
@@ -182,7 +235,7 @@ if menu == "📊 Tableau de bord & Stats":
             reg_totals = df_reg.groupby("Région")["Total_Qte"].sum()
             st.bar_chart(reg_totals)
         else:
-            st.info("Aucune donnée de région disponible.")
+            st.info("Aucune donnée de région.")
 
     st.markdown("---")
     st.subheader("📅 Stock par Millésime")
@@ -192,32 +245,29 @@ if menu == "📊 Tableau de bord & Stats":
         mill_totals = df_mill.groupby("Millesime")["Total_Qte"].sum()
         st.line_chart(mill_totals)
     else:
-        st.info("Aucune donnée de millésime disponible.")
+        st.info("Aucune donnée de millésime.")
 
 
 # --- 2. GESTION DE LA CAVE ---
-elif menu == "📥 Gestion de la Cave":
-    st.title("📥 Consultation, Modification et Dégustation")
+elif menu == "📥 Gestion du Stock":
+    st.title("📥 Gestion du Stock & Dégustations")
     st.write(
-        "Modifiez directement le stock, mettez à jour les quantités (marquez comme bu) puis cliquez sur **Enregistrer**."
+        "Modifiez vos stocks directement dans le tableau (pour marquer comme bu ou ajuster les quantités), puis enregistrez."
     )
 
     edited_df = st.data_editor(
-        df, num_rows="dynamic", use_container_width=True, height=500
+        df, num_rows="dynamic", use_container_width=True, height=520
     )
 
-    col_btn1, col_btn2 = st.columns([1, 3])
+    col_btn1, col_btn2 = st.columns([1, 4])
     with col_btn1:
         if st.button("💾 Enregistrer", use_container_width=True):
             edited_df.to_csv(DATA_FILE, index=False)
             st.success("Modifications enregistrées avec succès !")
 
     st.markdown("---")
-    st.subheader("📤 Export au format Excel (.xlsx)")
-    st.write("Téléchargez votre cave actuelle au format Excel.")
-
-    # Création d'un fichier Excel en mémoire pour l'export
-    import io
+    st.subheader("📤 Export des données")
+    st.write("Téléchargez votre cave au format Excel (.xlsx).")
 
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
@@ -225,7 +275,7 @@ elif menu == "📥 Gestion de la Cave":
     excel_data = output.getvalue()
 
     st.download_button(
-        label="📥 Télécharger le fichier Excel de la cave",
+        label="📥 Télécharger le fichier Excel",
         data=excel_data,
         file_name="Cave.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -234,8 +284,8 @@ elif menu == "📥 Gestion de la Cave":
 
 # --- 3. AJOUTER / IMPORTER ---
 elif menu == "➕ Ajouter / Importer":
-    st.title("➕ Ajouter un vin ou Importer votre fichier Excel")
-    tab1, tab2 = st.tabs(["➕ Ajout unitaire", "📥 Importer un fichier Excel"])
+    st.title("➕ Ajout et Import de Données")
+    tab1, tab2 = st.tabs(["➕ Ajout Unitaire", "📥 Import Fichier Excel"])
 
     with tab1:
         with st.form("add_form"):
@@ -293,14 +343,13 @@ elif menu == "➕ Ajouter / Importer":
 
     with tab2:
         st.write(
-            "Importez votre fichier Excel (`.xlsx`). L'application lira automatiquement l'onglet **Cave**."
+            "Importez votre fichier Excel (`.xlsx`). L'application ciblera automatiquement l'onglet **Cave**."
         )
         uploaded_excel = st.file_uploader(
-            "Choisissez votre fichier Excel", type=["xlsx", "xls"]
+            "Sélectionner le fichier Excel", type=["xlsx", "xls"]
         )
         if uploaded_excel is not None:
             try:
-                # Lecture de l'onglet 'Cave' (ou du premier onglet par défaut si l'onglet Cave n'est pas trouvé)
                 xls = pd.ExcelFile(uploaded_excel)
                 sheet_to_load = (
                     "Cave" if "Cave" in xls.sheet_names else xls.sheet_names[0]
@@ -308,12 +357,11 @@ elif menu == "➕ Ajouter / Importer":
                 imported_df = pd.read_excel(xls, sheet_name=sheet_to_load)
 
                 st.success(
-                    f"Fichier chargé avec succès (onglet utilisé : '{sheet_to_load}') !"
+                    f"Fichier chargé (onglet sélectionné : '{sheet_to_load}')"
                 )
                 st.dataframe(imported_df.head(), use_container_width=True)
 
-                if st.button("Valider et remplacer la cave actuelle"):
-                    # S'assurer que les colonnes localisations existent dans l'import
+                if st.button("Valider et remplacer le stock actuel"):
                     for loc in locations:
                         if loc not in imported_df.columns:
                             imported_df[loc] = 0.0
@@ -324,9 +372,11 @@ elif menu == "➕ Ajouter / Importer":
 
 
 # --- 4. PARAMÈTRES & EMPLACEMENTS ---
-elif menu == "⚙️ Paramètres & Emplacements":
-    st.title("⚙️ Gestion des Emplacements")
-    st.write("Renommez ou ajoutez vos emplacements de stockage.")
+elif menu == "⚙️ Paramètres":
+    st.title("⚙️ Paramètres des Emplacements")
+    st.write(
+        "Personnalisez les noms de vos caves ou ajoutez de nouveaux emplacements de stockage."
+    )
 
     new_locs = []
     for i, loc in enumerate(locations):
