@@ -6,7 +6,7 @@ import pandas as pd
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, session
 
 app = Flask(__name__)
-app.secret_key = "cave-secret-key-pro-v4"
+app.secret_key = "cave-secret-key-pro-v5"
 
 DATA_FILE = "data_cave.csv"
 LOCATIONS_FILE = "locations.json"
@@ -110,16 +110,6 @@ def load_data():
         return df
     return pd.DataFrame()
 
-def parse_price(pu_str):
-    if not pu_str:
-        return 0.0
-    cleaned = ''.join(c for c in str(pu_str) if c.isdigit() or c == '.' or c == ',')
-    cleaned = cleaned.replace(',', '.')
-    try:
-        return float(cleaned)
-    except ValueError:
-        return 0.0
-
 @app.before_request
 def check_auth():
     if not ENABLE_AUTH:
@@ -141,14 +131,9 @@ def index():
     total_bouteilles = int(df_locs.values.sum())
     total_references = len(df)
     
-    total_value = 0.0
     ready_to_drink_count = 0
-    
     for _, row in df.iterrows():
         row_qty = sum(float(row.get(l, 0) or 0) for l in locations)
-        price = parse_price(row.get('PU', 0))
-        total_value += row_qty * price
-        
         try:
             b_min = int(row.get('Boire Min', current_year))
             b_max = int(row.get('Boire Max', current_year))
@@ -170,7 +155,6 @@ def index():
     return render_template('index.html', 
                            total_bouteilles=total_bouteilles, 
                            total_references=total_references,
-                           total_value=round(total_value, 2),
                            ready_to_drink_count=ready_to_drink_count,
                            stock_loc=stock_loc,
                            stock_reg=stock_reg,
@@ -233,9 +217,9 @@ def stock():
     elif sort_by == 'domaine_asc':
         filtered_wines.sort(key=lambda x: str(x.get('Domaine', '')).lower())
     elif sort_by == 'price_desc':
-        filtered_wines.sort(key=lambda x: parse_price(x.get('PU', 0)), reverse=True)
+        filtered_wines.sort(key=lambda x: str(x.get('PU', '')), reverse=True)
     elif sort_by == 'price_asc':
-        filtered_wines.sort(key=lambda x: parse_price(x.get('PU', 0)), reverse=False)
+        filtered_wines.sort(key=lambda x: str(x.get('PU', '')), reverse=False)
 
     regions = load_regions()
     return render_template('stock.html', 

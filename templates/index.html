@@ -6,20 +6,22 @@
         <p class="text-xs text-gray-400">Patrimoine et maturité de votre cave</p>
     </div>
     
+    <!-- KPI Bouteilles & Références (Valorisation retirée) -->
     <div class="grid grid-cols-2 gap-3">
         <div class="glass-card p-4 rounded-2xl relative overflow-hidden border border-wine-200/10">
-            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Bouteilles</p>
+            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total Bouteilles</p>
             <p class="text-3xl font-extrabold text-gold-300 mt-1">{{ total_bouteilles }}</p>
-            <p class="text-[10px] text-emerald-400 mt-1 font-medium">({{ total_references }} références)</p>
+            <p class="text-[10px] text-emerald-400 mt-1 font-medium">En stock global</p>
         </div>
 
         <div class="glass-card p-4 rounded-2xl relative overflow-hidden border border-wine-200/10">
-            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Valorisation</p>
-            <p class="text-2xl font-extrabold text-white mt-1">{{ total_value }} €</p>
-            <p class="text-[10px] text-gold-300/80 mt-1 font-medium">Valeur estimée du stock</p>
+            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Références</p>
+            <p class="text-3xl font-extrabold text-white mt-1">{{ total_references }}</p>
+            <p class="text-[10px] text-wine-200 mt-1 font-medium">Cuvées uniques</p>
         </div>
     </div>
 
+    <!-- Alerte Apogée / Prêt à boire -->
     <div class="glass-card p-4 rounded-2xl flex items-center justify-between border border-gold-500/20 bg-gradient-to-r from-wine-900/60 to-wine-950/80">
         <div class="space-y-0.5">
             <span class="text-[10px] font-bold uppercase tracking-wider text-gold-300 bg-gold-500/10 px-2 py-0.5 rounded">Maturité idéale</span>

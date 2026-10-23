@@ -69,9 +69,18 @@
                     <span class="text-[10px] font-bold bg-blue-950/80 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-md">⏳ Garde</span>
                     {% endif %}
                 </div>
-                <a href="{{ url_for('edit_wine', wine_id=wine.id) }}" class="text-xs bg-gold-500/10 text-gold-300 border border-gold-500/30 px-2.5 py-1 rounded-xl font-medium hover:bg-gold-500/20 transition flex items-center space-x-1">
-                    <span>✏️</span> <span>Éditer</span>
-                </a>
+
+                <!-- ACTIONS : Bouton Éditer + Croix Rouge de Suppression -->
+                <div class="flex items-center space-x-1.5">
+                    <a href="{{ url_for('edit_wine', wine_id=wine.id) }}" class="text-xs bg-gold-500/10 text-gold-300 border border-gold-500/30 px-2.5 py-1 rounded-xl font-medium hover:bg-gold-500/20 transition flex items-center space-x-1">
+                        <span>✏️</span> <span>Éditer</span>
+                    </a>
+                    <form action="{{ url_for('delete_wine', wine_id=wine.id) }}" method="POST" onsubmit="return confirm('Voulez-vous vraiment supprimer définitivement ce vin ?')">
+                        <button type="submit" class="text-xs bg-red-950/80 text-red-300 border border-red-500/30 w-7 h-7 rounded-xl font-bold flex items-center justify-center hover:bg-red-900 transition" title="Supprimer">
+                            ❌
+                        </button>
+                    </form>
+                </div>
             </div>
 
             <div class="mb-3">
