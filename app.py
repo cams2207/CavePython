@@ -1,9 +1,9 @@
+import io
 import json
 import os
-import io
 from datetime import datetime
 import pandas as pd
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file, session
+from flask import Flask, flash, redirect, render_template, request, send_file, session
 
 app = Flask(__name__)
 app.secret_key = "cave-secret-key-wow"
@@ -18,20 +18,36 @@ ENABLE_AUTH = False
 CREDENTIALS = {"admin": "cave2026"}
 
 DEFAULT_REGIONS = [
-    "Bordeaux", "Bourgogne", "Vallée du Rhône", "Alsace", 
-    "Champagne", "Loire", "Beaujolais", "Languedoc-Roussillon", "Provence", "Sud-Ouest"
+    "Bordeaux",
+    "Bourgogne",
+    "Vallée du Rhône",
+    "Alsace",
+    "Champagne",
+    "Loire",
+    "Beaujolais",
+    "Languedoc-Roussillon",
+    "Provence",
+    "Sud-Ouest",
 ]
 
 DEFAULT_DOMAINES = [
-    "Domaine Leflaive", "Château Margaux", "Domaine Guigal", "Château Lynch-Bages",
-    "Domaine Dujac", "Château Chalon", "Maison Trimbach", "Domaine Tempier"
+    "Domaine Leflaive",
+    "Château Margaux",
+    "Domaine Guigal",
+    "Château Lynch-Bages",
+    "Domaine Dujac",
+    "Château Chalon",
+    "Maison Trimbach",
+    "Domaine Tempier",
 ]
 
 DEFAULT_LOCATIONS = ["Reste chez Fred", "Reste Appart", "Reste St Yorre"]
 
+
 def save_json(filename, data):
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
 
 def load_json(filename, default):
     if os.path.exists(filename):
@@ -42,17 +58,22 @@ def load_json(filename, default):
             return default
     return default
 
+
 def load_locations():
     return load_json(LOCATIONS_FILE, DEFAULT_LOCATIONS)
+
 
 def load_regions():
     return load_json(REGIONS_FILE, DEFAULT_REGIONS)
 
+
 def load_domaines():
     return load_json(DOMAINES_FILE, DEFAULT_DOMAINES)
 
+
 def load_history():
     return load_json(HISTORY_FILE, [])
+
 
 def init_files():
     if not os.path.exists(LOCATIONS_FILE):
@@ -65,26 +86,68 @@ def init_files():
         save_json(HISTORY_FILE, [])
     if not os.path.exists(DATA_FILE):
         locs = load_locations()
-        columns = ["id", "Date", "Région", "Domaine", "Vin", "Millesime", "Boire Min", "Boire Max", "PU", "Statut"] + locs
+        columns = [
+            "id",
+            "Date",
+            "Région",
+            "Domaine",
+            "Vin",
+            "Millesime",
+            "Boire Min",
+            "Boire Max",
+            "PU",
+            "Statut",
+        ] + locs
         sample_data = [
             {
-                "id": 1, "Date": "2023-05-10", "Région": "Bordeaux", "Domaine": "Château Lynch-Bages", 
-                "Vin": "Pauillac Grand Cru Classé", "Millesime": 2015, "Boire Min": 2022, "Boire Max": 2035, 
-                "PU": "120€", "Statut": "Garde", "Reste chez Fred": 2, "Reste Appart": 1, "Reste St Yorre": 0
+                "id": 1,
+                "Date": "2023-05-10",
+                "Région": "Bordeaux",
+                "Domaine": "Château Lynch-Bages",
+                "Vin": "Pauillac Grand Cru Classé",
+                "Millesime": 2015,
+                "Boire Min": 2022,
+                "Boire Max": 2035,
+                "PU": "120€",
+                "Statut": "Garde",
+                "Reste chez Fred": 2,
+                "Reste Appart": 1,
+                "Reste St Yorre": 0,
             },
             {
-                "id": 2, "Date": "2024-01-15", "Région": "Bourgogne", "Domaine": "Domaine Dujac", 
-                "Vin": "Morey-Saint-Denis", "Millesime": 2018, "Boire Min": 2023, "Boire Max": 2030, 
-                "PU": "85€", "Statut": "A boire", "Reste chez Fred": 0, "Reste Appart": 2, "Reste St Yorre": 1
+                "id": 2,
+                "Date": "2024-01-15",
+                "Région": "Bourgogne",
+                "Domaine": "Domaine Dujac",
+                "Vin": "Morey-Saint-Denis",
+                "Millesime": 2018,
+                "Boire Min": 2023,
+                "Boire Max": 2030,
+                "PU": "85€",
+                "Statut": "A boire",
+                "Reste chez Fred": 0,
+                "Reste Appart": 2,
+                "Reste St Yorre": 1,
             },
             {
-                "id": 3, "Date": "2023-11-20", "Région": "Vallée du Rhône", "Domaine": "Domaine Guigal", 
-                "Vin": "Côte-Rôtie Château d'Ampuis", "Millesime": 2017, "Boire Min": 2024, "Boire Max": 2038, 
-                "PU": "110€", "Statut": "Apogée", "Reste chez Fred": 3, "Reste Appart": 0, "Reste St Yorre": 2
-            }
+                "id": 3,
+                "Date": "2023-11-20",
+                "Région": "Vallée du Rhône",
+                "Domaine": "Domaine Guigal",
+                "Vin": "Côte-Rôtie Château d'Ampuis",
+                "Millesime": 2017,
+                "Boire Min": 2024,
+                "Boire Max": 2038,
+                "PU": "110€",
+                "Statut": "Apogée",
+                "Reste chez Fred": 3,
+                "Reste Appart": 0,
+                "Reste St Yorre": 2,
+            },
         ]
         df = pd.DataFrame(sample_data)
         df.to_csv(DATA_FILE, index=False)
+
 
 def load_data():
     init_files()
@@ -99,24 +162,26 @@ def load_data():
         return df
     return pd.DataFrame()
 
+
 @app.before_request
 def check_auth():
     if not ENABLE_AUTH:
         return
-    if request.endpoint in ['login', 'static'] or session.get('user_logged_in'):
+    if request.endpoint in ["login", "static"] or session.get("user_logged_in"):
         return
-    return redirect(url_for('login'))
+    return redirect(url_for("login"))
 
-@app.route('/')
+
+@app.route("/")
 def index():
     df = load_data()
     locations = load_locations()
-    
+
     loc_cols = [c for c in locations if c in df.columns]
-    df_locs = df[loc_cols].apply(pd.to_numeric, errors='coerce').fillna(0)
+    df_locs = df[loc_cols].apply(pd.to_numeric, errors="coerce").fillna(0)
     total_bouteilles = int(df_locs.values.sum())
     total_references = len(df)
-    
+
     stock_loc = df_locs.sum().to_dict()
     stock_reg = {}
     if "Région" in df.columns:
@@ -127,79 +192,94 @@ def index():
     history = load_history()
     recent_bu = history[-4:][::-1]
 
-    return render_template('index.html', 
-                           total_bouteilles=total_bouteilles, 
-                           total_references=total_references,
-                           stock_loc=stock_loc,
-                           stock_reg=stock_reg,
-                           recent_bu=recent_bu,
-                           active_tab='dashboard')
+    return render_template(
+        "index.html",
+        total_bouteilles=total_bouteilles,
+        total_references=total_references,
+        stock_loc=stock_loc,
+        stock_reg=stock_reg,
+        recent_bu=recent_bu,
+        active_tab="dashboard",
+    )
 
-@app.route('/stock')
+
+@app.route("/stock")
 def stock():
     df = load_data()
     locations = load_locations()
-    query = request.args.get('q', '').strip().lower()
-    selected_region = request.args.get('region', '').strip()
-    selected_statut = request.args.get('statut', '').strip()
+    query = request.args.get("q", "").strip().lower()
+    selected_region = request.args.get("region", "").strip()
+    selected_statut = request.args.get("statut", "").strip()
 
-    wines = df.to_dict(orient='records')
-    
-    # Global search and filter
+    df = df.fillna(0)
+    wines = df.to_dict(orient="records")
+
     filtered_wines = []
     for w in wines:
-        loc_sum = sum(float(w.get(l, 0) or 0) for l in locations)
-        w['total_qty'] = int(loc_sum)
-        
+        loc_sum = 0
+        for l in locations:
+            val = w.get(l, 0)
+            try:
+                f_val = float(val)
+                if pd.notna(f_val):
+                    loc_sum += f_val
+            except (ValueError, TypeError):
+                pass
+
+        w["total_qty"] = int(loc_sum)
+
         match_query = True
         if query:
             searchable_text = f"{w.get('Région','')} {w.get('Domaine','')} {w.get('Vin','')} {w.get('Millesime','')} {w.get('Statut','')}".lower()
             match_query = query in searchable_text
-            
+
         match_region = True
         if selected_region:
-            match_region = (w.get('Région') == selected_region)
+            match_region = str(w.get("Région")) == selected_region
 
         match_statut = True
         if selected_statut:
-            match_statut = (w.get('Statut') == selected_statut)
+            match_statut = str(w.get("Statut")) == selected_statut
 
         if match_query and match_region and match_statut:
             filtered_wines.append(w)
 
     regions = load_regions()
-    return render_template('stock.html', 
-                           wines=filtered_wines, 
-                           locations=locations, 
-                           regions=regions,
-                           query=query, 
-                           selected_region=selected_region,
-                           selected_statut=selected_statut,
-                           active_tab='stock')
+    return render_template(
+        "stock.html",
+        wines=filtered_wines,
+        locations=locations,
+        regions=regions,
+        query=query,
+        selected_region=selected_region,
+        selected_statut=selected_statut,
+        active_tab="stock",
+    )
 
-@app.route('/edit_wine/<int:wine_id>', methods=['GET', 'POST'])
+
+@app.route("/edit_wine/<int:wine_id>", methods=["GET", "POST"])
 def edit_wine(wine_id):
     df = load_data()
     locations = load_locations()
     regions = load_regions()
     domaines = load_domaines()
 
-    wine_row = df[df['id'] == wine_id]
+    wine_row = df[df["id"] == wine_id]
     if wine_row.empty:
         flash("Vin introuvable.", "error")
-        return redirect(url_for('stock'))
+        return redirect(url_for("stock"))
 
     idx = wine_row.index[0]
 
-    if request.method == 'POST':
-        df.loc[idx, 'Région'] = request.form.get('region', '')
-        df.loc[idx, 'Domaine'] = request.form.get('domaine', '')
-        df.loc[idx, 'Vin'] = request.form.get('vin', '')
-        df.loc[idx, 'Millesime'] = request.form.get('millesime', 2020)
-        df.loc[idx, 'Boire Min'] = request.form.get('boire_min', 2024)
-        df.loc[idx, 'Boire Max'] = request.form.get('boire_max', 2030)
-        df.loc[idx, 'PU'] = request.form.get('pu', '')
-        df.loc[idx, 'Statut'] = request.form.get('statut', 'A boire')
+    if request.method == "POST":
+        df.loc[idx, "Région"] = request.form.get("region", "")
+        df.loc[idx, "Domaine"] = request.form.get("domaine", "")
+        df.loc[idx, "Vin"] = request.form.get("vin", "")
+        df.loc[idx, "Millesime"] = request.form.get("millesime", 2020)
+        df.loc[idx, "Boire Min"] = request.form.get("boire_min", 2024)
+        df.loc[idx, "Boire Max"] = request.form.get("boire_max", 2030)
+        df.loc[idx, "PU"] = request.form.get("pu", "")
+        df.loc[idx, "Statut"] = request.form.get("statut", "A boire")
 
         for loc in locations:
             try:
@@ -209,20 +289,29 @@ def edit_wine(wine_id):
 
         df.to_csv(DATA_FILE, index=False)
         flash("Les modifications de la fiche ont été enregistrées !", "success")
-        return redirect(url_for('stock'))
+        return redirect(url_for("stock"))
 
     wine_data = wine_row.iloc[0].to_dict()
-    return render_template('edit.html', wine=wine_data, locations=locations, regions=regions, domaines=domaines, active_tab='stock')
+    return render_template(
+        "edit.html",
+        wine=wine_data,
+        locations=locations,
+        regions=regions,
+        domaines=domaines,
+        active_tab="stock",
+    )
 
-@app.route('/delete_wine/<int:wine_id>', methods=['POST'])
+
+@app.route("/delete_wine/<int:wine_id>", methods=["POST"])
 def delete_wine(wine_id):
     df = load_data()
-    df = df[df['id'] != wine_id]
+    df = df[df["id"] != wine_id]
     df.to_csv(DATA_FILE, index=False)
     flash("Fiche de vin supprimée avec succès.", "success")
-    return redirect(url_for('stock'))
+    return redirect(url_for("stock"))
 
-@app.route('/mark_bu', methods=['POST'])
+
+@app.route("/mark_bu", methods=["POST"])
 def mark_bu():
     wine_id = request.form.get("wine_id")
     loc = request.form.get("location")
@@ -231,12 +320,12 @@ def mark_bu():
     date_bu = request.form.get("date_bu", datetime.now().strftime("%Y-%m-%d"))
 
     df = load_data()
-    wine_row = df[df['id'].astype(str) == str(wine_id)]
+    wine_row = df[df["id"].astype(str) == str(wine_id)]
 
     if not wine_row.empty:
         idx = wine_row.index[0]
         current_qty = float(df.loc[idx, loc]) if loc in df.columns else 0
-        
+
         if current_qty > 0:
             df.loc[idx, loc] = current_qty - 1
             df.to_csv(DATA_FILE, index=False)
@@ -251,30 +340,38 @@ def mark_bu():
                 "region": wine_row.iloc[0].get("Région", ""),
                 "location": loc,
                 "rating": int(rating),
-                "note": note
+                "note": note,
             }
             history.append(history_entry)
             save_json(HISTORY_FILE, history)
-            flash(f"🎉 1 bouteille consommée ({loc}) ! Fiche mise à jour & ajoutée au carnet.", "success")
+            flash(
+                f"🎉 1 bouteille consommée ({loc}) ! Fiche mise à jour & ajoutée au carnet.",
+                "success",
+            )
         else:
-            flash(f"Aucune bouteille disponible dans l'emplacement {loc}.", "error")
-            
-    return redirect(url_for('stock'))
+            flash(
+                f"Aucune bouteille disponible dans l'emplacement {loc}.",
+                "error",
+            )
 
-@app.route('/history')
+    return redirect(url_for("stock"))
+
+
+@app.route("/history")
 def history():
     history_data = load_history()[::-1]
-    return render_template('history.html', history=history_data, active_tab='history')
+    return render_template("history.html", history=history_data, active_tab="history")
 
-@app.route('/add', methods=['GET', 'POST'])
+
+@app.route("/add", methods=["GET", "POST"])
 def add_wine():
     locations = load_locations()
     regions = load_regions()
     domaines = load_domaines()
 
-    if request.method == 'POST':
+    if request.method == "POST":
         df = load_data()
-        
+
         region = request.form.get("region", "")
         domaine = request.form.get("domaine", "")
 
@@ -285,10 +382,16 @@ def add_wine():
             domaines.append(domaine)
             save_json(DOMAINES_FILE, sorted(domaines))
 
-        new_id = int(df["id"].max() + 1) if not df.empty and "id" in df.columns else 1
+        new_id = (
+            int(df["id"].max() + 1)
+            if not df.empty and "id" in df.columns
+            else 1
+        )
         new_row = {
             "id": new_id,
-            "Date": request.form.get("date", datetime.now().strftime("%Y-%m-%d")),
+            "Date": request.form.get(
+                "date", datetime.now().strftime("%Y-%m-%d")
+            ),
             "Région": region,
             "Domaine": domaine,
             "Vin": request.form.get("vin", ""),
@@ -296,67 +399,85 @@ def add_wine():
             "Boire Min": request.form.get("boire_min", 2024),
             "Boire Max": request.form.get("boire_max", 2030),
             "PU": request.form.get("pu", ""),
-            "Statut": request.form.get("statut", "A boire")
+            "Statut": request.form.get("statut", "A boire"),
         }
         for loc in locations:
             new_row[loc] = float(request.form.get(f"qty_{loc}", 0))
-            
+
         df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
         df.to_csv(DATA_FILE, index=False)
         flash("Nouveau vin ajouté avec succès !", "success")
-        return redirect(url_for('stock'))
-        
-    return render_template('add.html', locations=locations, regions=regions, domaines=domaines, active_tab='add')
+        return redirect(url_for("stock"))
 
-@app.route('/import_export', methods=['GET', 'POST'])
+    return render_template(
+        "add.html",
+        locations=locations,
+        regions=regions,
+        domaines=domaines,
+        active_tab="add",
+    )
+
+
+@app.route("/import_export", methods=["GET", "POST"])
 def import_export():
     locations = load_locations()
-    if request.method == 'POST':
-        file = request.files.get('file')
-        if file and file.filename.endswith(('.xlsx', '.xls')):
+    if request.method == "POST":
+        file = request.files.get("file")
+        if file and file.filename.endswith((".xlsx", ".xls")):
             try:
                 xls = pd.ExcelFile(file)
-                sheet_name = 'Cave' if 'Cave' in xls.sheet_names else xls.sheet_names[0]
+                sheet_name = (
+                    "Cave" if "Cave" in xls.sheet_names else xls.sheet_names[0]
+                )
                 imported_df = pd.read_excel(xls, sheet_name=sheet_name)
-                
+
                 if "id" not in imported_df.columns:
-                    imported_df.insert(0, "id", range(1, len(imported_df) + 1))
-                    
+                    imported_df.insert(
+                        0, "id", range(1, len(imported_df) + 1)
+                    )
+
                 for loc in locations:
                     if loc not in imported_df.columns:
                         imported_df[loc] = 0.0
-                        
+
                 imported_df.to_csv(DATA_FILE, index=False)
-                flash(f"Importation réussie depuis l'onglet '{sheet_name}' !", "success")
+                flash(
+                    f"Importation réussie depuis l'onglet '{sheet_name}' !",
+                    "success",
+                )
             except Exception as e:
                 flash(f"Erreur lors de la lecture du fichier : {e}", "error")
-    return render_template('import_export.html', active_tab='import')
+    return render_template("import_export.html", active_tab="import")
 
-@app.route('/export_excel')
+
+@app.route("/export_excel")
 def export_excel():
     df = load_data()
     output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, sheet_name='Cave', index=False)
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, sheet_name="Cave", index=False)
     output.seek(0)
     return send_file(
         output,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         as_attachment=True,
-        download_name="Cave.xlsx"
+        download_name="Cave.xlsx",
     )
 
-@app.route('/settings', methods=['GET', 'POST'])
+
+@app.route("/settings", methods=["GET", "POST"])
 def settings():
     locations = load_locations()
     regions = load_regions()
     domaines = load_domaines()
 
-    if request.method == 'POST':
+    if request.method == "POST":
         action = request.form.get("action")
 
         if action == "update_locations":
-            new_locs = [l.strip() for l in request.form.getlist('locations') if l.strip()]
+            new_locs = [
+                l.strip() for l in request.form.getlist("locations") if l.strip()
+            ]
             df = load_data()
             for old_l, new_l in zip(locations, new_locs):
                 if old_l != new_l and old_l in df.columns:
@@ -393,9 +514,16 @@ def settings():
                 save_json(DOMAINES_FILE, domaines)
                 flash(f"Domaine '{dom_to_del}' supprimé !", "success")
 
-        return redirect(url_for('settings'))
+        return redirect(url_for("settings"))
 
-    return render_template('settings.html', locations=locations, regions=regions, domaines=domaines, active_tab='settings')
+    return render_template(
+        "settings.html",
+        locations=locations,
+        regions=regions,
+        domaines=domaines,
+        active_tab="settings",
+    )
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8501)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8501)
