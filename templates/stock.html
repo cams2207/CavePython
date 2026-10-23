@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="space-y-4">
+    <h2 class="text-2xl font-bold text-[#7D1242]">Gestion du Stock</h2>
+    <p class="text-xs text-gray-500">Modifiez les quantités directement et enregistrez.</p>
+
+    <form action="{{ url_for('update_stock') }}" method="POST">
+        {% for wine in wines %}
+        <div class="bg-white p-4 rounded-xl shadow-sm mb-3 border border-gray-100">
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <span class="text-xs bg-pink-100 text-[#7D1242] px-2 py-0.5 rounded font-semibold">{{ wine.Région }}</span>
+                    <h3 class="font-bold text-gray-800 mt-1">{{ wine.Domaine }} - {{ wine.Vin }}</h3>
+                    <p class="text-xs text-gray-500">Millésime : {{ wine.Millesime }} | Boire : {{ wine.get('Boire Min','') }} - {{ wine.get('Boire Max','') }}</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-gray-100">
+                {% for loc in locations %}
+                <div>
+                    <label class="block text-[10px] text-gray-500 mb-1 truncate">{{ loc }}</label>
+                    <input type="number" step="1" name="loc_{{ loop.index0 }}_{{ loc }}" value="{{ wine.get(loc, 0) }}" class="w-full text-center border rounded p-1 text-sm bg-gray-50 font-bold text-[#7D1242]">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="w-full bg-[#7D1242] text-white py-3 rounded-xl font-bold shadow-md mt-4">
+            💾 Enregistrer les modifications
+        </button>
+    </form>
+</div>
+{% endblock %}
