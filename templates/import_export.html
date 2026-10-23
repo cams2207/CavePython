@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="space-y-4">
+    <h2 class="text-2xl font-bold text-[#7D1242]">Import / Export Excel</h2>
+    
+    <div class="bg-white p-4 rounded-xl shadow-sm space-y-3">
+        <h3 class="font-bold text-sm text-gray-700">📤 Exporter le fichier</h3>
+        <a href="{{ url_for('export_excel') }}" class="block text-center bg-[#7D1242] text-white py-3 rounded-xl font-bold shadow-md">
+            Télécharger Cave.xlsx
+        </a>
+    </div>
+
+    <div class="bg-white p-4 rounded-xl shadow-sm space-y-3">
+        <h3 class="font-bold text-sm text-gray-700">📥 Importer un fichier Excel</h3>
+        <form action="{{ url_for('import_export') }}" method="POST" enctype="multipart/form-data" class="space-y-3">
+            <input type="file" name="file" accept=".xlsx, .xls" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-[#7D1242] hover:file:bg-pink-100">
+            <button type="submit" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold shadow-md">
+                Valider l'import
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
