@@ -2,33 +2,111 @@
 {% block content %}
 <div class="space-y-4">
     <h2 class="text-2xl font-bold text-[#7D1242]">Gestion du Stock</h2>
-    <p class="text-xs text-gray-500">Modifiez les quantités directement et enregistrez.</p>
+
+    <!-- BARRE DE RECHERCHE GLOBALE -->
+    <form action="{{ url_for('stock') }}" method="GET" class="relative">
+        <input type="text" name="q" value="{{ query }}" placeholder="🔍 Rechercher (région, domaine, vin, millésime...)" 
+               class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#7D1242]">
+        <span class="absolute left-3 top-3 text-gray-400">🔍</span>
+        {% if query %}
+        <a href="{{ url_for('stock') }}" class="absolute right-3 top-2.5 text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">Effacer</a>
+        {% endif %}
+    </form>
 
     <form action="{{ url_for('update_stock') }}" method="POST">
         {% for wine in wines %}
         <div class="bg-white p-4 rounded-xl shadow-sm mb-3 border border-gray-100">
-            <div class="flex justify-between items-start mb-2">
+            <div class="flex justify-between items-start mb-1">
                 <div>
-                    <span class="text-xs bg-pink-100 text-[#7D1242] px-2 py-0.5 rounded font-semibold">{{ wine.Région }}</span>
-                    <h3 class="font-bold text-gray-800 mt-1">{{ wine.Domaine }} - {{ wine.Vin }}</h3>
-                    <p class="text-xs text-gray-500">Millésime : {{ wine.Millesime }} | Boire : {{ wine.get('Boire Min','') }} - {{ wine.get('Boire Max','') }}</p>
+                    <span class="text-[10px] bg-pink-100 text-[#7D1242] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">{{ wine.Région }}</span>
+                    <h3 class="font-bold text-gray-800 text-base mt-1">{{ wine.Domaine }}</h3>
+                    <p class="text-sm font-semibold text-gray-700">{{ wine.Vin }}</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Millésime : <strong>{{ wine.Millesime }}</strong> | Boire : {{ wine.get('Boire Min','') }} - {{ wine.get('Boire Max','') }}</p>
                 </div>
             </div>
             
+            <!-- Emplacements & Quantités -->
             <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-gray-100">
                 {% for loc in locations %}
-                <div>
-                    <label class="block text-[10px] text-gray-500 mb-1 truncate">{{ loc }}</label>
-                    <input type="number" step="1" name="loc_{{ loop.index0 }}_{{ loc }}" value="{{ wine.get(loc, 0) }}" class="w-full text-center border rounded p-1 text-sm bg-gray-50 font-bold text-[#7D1242]">
+                <div class="bg-gray-50 p-2 rounded-lg text-center">
+                    <label class="block text-[10px] text-gray-500 font-semibold truncate">{{ loc }}</label>
+                    <input type="number" step="1" name="loc_{{ loop.index0 }}_{{ loc }}" value="{{ wine.get(loc, 0) | int }}" 
+                           class="w-full text-center border rounded p-1 text-sm bg-white font-bold text-[#7D1242]">
+                    
+                    <!-- BOUTON MARQUER COMME BU -->
+                    {% if wine.get(loc, 0) > 0 %}
+                    <button type="button" onclick="openBuModal('{{ wine.id }}', '{{ wine.Domaine | escape }}', '{{ wine.Vin | escape }}', '{{ loc | escape }}')" 
+                            class="w-full mt-1.5 text-[10px] bg-red-50 text-red-700 border border-red-200 py-1 rounded font-semibold hover:bg-red-100">
+                        🍷 Bu (-1)
+                    </button>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
         </div>
+        {% else %}
+        <div class="text-center py-8 text-gray-500 bg-white rounded-xl">
+            <p>Aucun vin trouvé pour cette recherche.</p>
+        </div>
         {% endfor %}
 
-        <button type="submit" class="w-full bg-[#7D1242] text-white py-3 rounded-xl font-bold shadow-md mt-4">
-            💾 Enregistrer les modifications
+        {% if wines %}
+        <button type="submit" class="w-full bg-[#7D1242] text-white py-3 rounded-xl font-bold shadow-md mt-2">
+            💾 Enregistrer les quantités
         </button>
+        {% endif %}
     </form>
 </div>
+
+<!-- MODAL EVALUATION RAPIDE VIN BU -->
+<div id="buModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+        <h3 class="font-bold text-lg text-[#7D1242] border-b pb-2">🍷 Évaluation de dégustation</h3>
+        <p id="modalWineTitle" class="text-xs text-gray-600 font-medium"></p>
+
+        <form action="{{ url_for('mark_bu') }}" method="POST" class="space-y-3">
+            <input type="hidden" name="wine_id" id="modalWineId">
+            <input type="hidden" name="location" id="modalLocation">
+
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Note de dégustation</label>
+                <select name="rating" class="w-full border rounded-lg p-2 text-sm bg-gray-50 font-bold text-yellow-600">
+                    <option value="5">⭐⭐⭐⭐⭐ Excellent (5/5)</option>
+                    <option value="4" selected>⭐⭐⭐⭐ Très bon (4/5)</option>
+                    <option value="3">⭐⭐⭐ Correct (3/5)</option>
+                    <option value="2">⭐⭐ Bof / Moyen (2/5)</option>
+                    <option value="1">⭐ Décevant / Bouchonné (1/5)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Commentaire / Avis</label>
+                <textarea name="note" rows="2" placeholder="Nez fruité, belle longueur, à décanter..." class="w-full border rounded-lg p-2 text-sm bg-gray-50"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Date de dégustation</label>
+                <input type="date" name="date_bu" id="modalDateBu" class="w-full border rounded-lg p-2 text-sm bg-gray-50">
+            </div>
+
+            <div class="flex space-x-2 pt-2">
+                <button type="button" onclick="closeBuModal()" class="w-1/2 bg-gray-200 text-gray-700 py-2.5 rounded-xl font-bold text-xs">Annuler</button>
+                <button type="submit" class="w-1/2 bg-[#7D1242] text-white py-2.5 rounded-xl font-bold text-xs shadow-md">Valider (-1 btl)</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openBuModal(id, domaine, vin, location) {
+    document.getElementById('modalWineId').value = id;
+    document.getElementById('modalLocation').value = location;
+    document.getElementById('modalWineTitle').innerText = domaine + ' - ' + vin + ' (' + location + ')';
+    document.getElementById('modalDateBu').value = new Date().toISOString().split('T')[0];
+    document.getElementById('buModal').classList.remove('hidden');
+}
+function closeBuModal() {
+    document.getElementById('buModal').classList.add('hidden');
+}
+</script>
 {% endblock %}

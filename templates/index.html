@@ -9,21 +9,59 @@
             <p class="text-2xl font-bold text-gray-800">{{ total_references }}</p>
         </div>
         <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-[#7D1242]">
-            <p class="text-xs text-gray-500">Bouteilles totales</p>
+            <p class="text-xs text-gray-500">Bouteilles en stock</p>
             <p class="text-2xl font-bold text-gray-800">{{ total_bouteilles }}</p>
         </div>
     </div>
 
+    <!-- Stock par Emplacement -->
     <div class="bg-white p-4 rounded-xl shadow-sm">
         <h3 class="font-bold text-gray-700 mb-3">📍 Stock par Emplacement</h3>
         <ul class="space-y-2">
             {% for loc, qte in stock_loc.items() %}
             <li class="flex justify-between items-center border-b pb-2">
-                <span class="text-sm text-gray-600">{{ loc }}</span>
-                <span class="font-bold text-[#7D1242]">{{ qte | int }} bts</span>
+                <span class="text-sm text-gray-600 font-medium">{{ loc }}</span>
+                <span class="font-bold text-[#7D1242] bg-pink-50 px-2 py-0.5 rounded-full text-xs">{{ qte | int }} bts</span>
             </li>
             {% endfor %}
         </ul>
     </div>
+
+    <!-- Stock par Région -->
+    <div class="bg-white p-4 rounded-xl shadow-sm">
+        <h3 class="font-bold text-gray-700 mb-3">🌍 Stock par Région</h3>
+        <ul class="space-y-2">
+            {% for reg, qte in stock_reg.items() %}
+            <li class="flex justify-between items-center border-b pb-2">
+                <span class="text-sm text-gray-600">{{ reg }}</span>
+                <span class="font-bold text-gray-800 text-xs">{{ qte | int }} bts</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Derniers Vins Bus -->
+    {% if recent_bu %}
+    <div class="bg-white p-4 rounded-xl shadow-sm">
+        <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-gray-700">🍷 Dégustations Récents</h3>
+            <a href="{{ url_for('history') }}" class="text-xs text-[#7D1242] font-semibold">Voir tout →</a>
+        </div>
+        <div class="space-y-2">
+            {% for item in recent_bu %}
+            <div class="border-b pb-2 text-xs">
+                <div class="flex justify-between font-bold text-gray-800">
+                    <span>{{ item.domaine }} - {{ item.vin }} ({{ item.millesime }})</span>
+                    <span class="text-yellow-500">{"★" * item.rating}</span>
+                </div>
+                <div class="text-gray-500 flex justify-between mt-1">
+                    <span>Bu le {{ item.date }}</span>
+                    {% if item.note %}<span class="italic text-gray-600">"{{ item.note }}"</span>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

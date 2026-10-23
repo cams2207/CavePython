@@ -3,49 +3,70 @@
 <div class="space-y-4">
     <h2 class="text-2xl font-bold text-[#7D1242]">Ajouter un Vin</h2>
     <form action="{{ url_for('add_wine') }}" method="POST" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
+        
+        <!-- REGION SÉLECTION / Saisie libre -->
         <div>
-            <label class="block text-xs font-semibold text-gray-600">Région</label>
-            <input type="text" name="region" class="w-full border rounded p-2 text-sm">
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Région</label>
+            <input list="regions_list" name="region" placeholder="Choisissez ou tapez une région" class="w-full border rounded p-2 text-sm" required>
+            <datalist id="regions_list">
+                {% for r in regions %}
+                <option value="{{ r }}">
+                {% endfor %}
+            </datalist>
         </div>
+
+        <!-- DOMAINE SÉLECTION / Saisie libre -->
         <div>
-            <label class="block text-xs font-semibold text-gray-600">Domaine</label>
-            <input type="text" name="domaine" class="w-full border rounded p-2 text-sm" required>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Domaine</label>
+            <input list="domaines_list" name="domaine" placeholder="Choisissez ou tapez un domaine" class="w-full border rounded p-2 text-sm" required>
+            <datalist id="domaines_list">
+                {% for d in domaines %}
+                <option value="{{ d }}">
+                {% endfor %}
+            </datalist>
         </div>
+
         <div>
-            <label class="block text-xs font-semibold text-gray-600">Nom du Vin</label>
-            <input type="text" name="vin" class="w-full border rounded p-2 text-sm" required>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Nom du Vin / Cuvee</label>
+            <input type="text" name="vin" placeholder="Ex: Grand Cru, Cuvee Tradition..." class="w-full border rounded p-2 text-sm" required>
         </div>
+
         <div class="grid grid-cols-3 gap-2">
             <div>
-                <label class="block text-xs font-semibold text-gray-600">Millésime</label>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Millésime</label>
                 <input type="number" name="millesime" value="2020" class="w-full border rounded p-2 text-sm">
             </div>
             <div>
-                <label class="block text-xs font-semibold text-gray-600">Boire Min</label>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Boire Min</label>
                 <input type="number" name="boire_min" value="2024" class="w-full border rounded p-2 text-sm">
             </div>
             <div>
-                <label class="block text-xs font-semibold text-gray-600">Boire Max</label>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Boire Max</label>
                 <input type="number" name="boire_max" value="2030" class="w-full border rounded p-2 text-sm">
             </div>
         </div>
+
         <div class="grid grid-cols-2 gap-2">
             <div>
-                <label class="block text-xs font-semibold text-gray-600">Prix Unit. (PU)</label>
-                <input type="text" name="pu" class="w-full border rounded p-2 text-sm">
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Prix Unitaire (PU)</label>
+                <input type="text" name="pu" placeholder="Ex: 25€" class="w-full border rounded p-2 text-sm">
             </div>
             <div>
-                <label class="block text-xs font-semibold text-gray-600">Date d'achat</label>
-                <input type="text" name="date" class="w-full border rounded p-2 text-sm">
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Statut</label>
+                <select name="statut" class="w-full border rounded p-2 text-sm bg-white">
+                    <option value="A boire">A boire</option>
+                    <option value="Garde">Garde</option>
+                    <option value="Apogée">Apogée</option>
+                </select>
             </div>
         </div>
 
         <hr class="my-2">
-        <h3 class="font-bold text-sm text-gray-700">Répartition par cave :</h3>
+        <h3 class="font-bold text-sm text-gray-700">Stock initial par emplacement :</h3>
         {% for loc in locations %}
         <div>
-            <label class="block text-xs text-gray-500">{{ loc }}</label>
-            <input type="number" step="1" name="qty_{{ loc }}" value="0" class="w-full border rounded p-2 text-sm">
+            <label class="block text-xs text-gray-500 mb-1">{{ loc }}</label>
+            <input type="number" step="1" name="qty_{{ loc }}" value="0" class="w-full border rounded p-2 text-sm font-bold text-[#7D1242]">
         </div>
         {% endfor %}
 

@@ -1,17 +1,67 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="space-y-4">
-    <h2 class="text-2xl font-bold text-[#7D1242]">Réglages des Emplacements</h2>
-    <form action="{{ url_for('settings') }}" method="POST" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
-        {% for loc in locations %}
-        <div>
-            <label class="block text-xs font-semibold text-gray-600">Emplacement {{ loop.index }}</label>
-            <input type="text" name="locations" value="{{ loc }}" class="w-full border rounded p-2 text-sm font-bold text-[#7D1242]" required>
+    <h2 class="text-2xl font-bold text-[#7D1242]">Gestion & Paramètres</h2>
+
+    <!-- EMPLACEMENTS -->
+    <div class="bg-white p-4 rounded-xl shadow-sm space-y-3">
+        <h3 class="font-bold text-sm text-gray-800">📍 Emplacements de stockage</h3>
+        <form action="{{ url_for('settings') }}" method="POST" class="space-y-2">
+            <input type="hidden" name="action" value="update_locations">
+            {% for loc in locations %}
+            <div>
+                <input type="text" name="locations" value="{{ loc }}" class="w-full border rounded p-2 text-sm font-bold text-[#7D1242]">
+            </div>
+            {% endfor %}
+            <button type="submit" class="w-full bg-[#7D1242] text-white py-2 rounded-lg font-bold text-xs shadow-sm">
+                Enregistrer les emplacements
+            </button>
+        </form>
+    </div>
+
+    <!-- REGIONS -->
+    <div class="bg-white p-4 rounded-xl shadow-sm space-y-3">
+        <h3 class="font-bold text-sm text-gray-800">🌍 Liste des Régions</h3>
+        <form action="{{ url_for('settings') }}" method="POST" class="flex space-x-2">
+            <input type="hidden" name="action" value="add_region">
+            <input type="text" name="new_region" placeholder="Nouvelle région..." class="w-full border rounded p-2 text-sm" required>
+            <button type="submit" class="bg-[#7D1242] text-white px-3 rounded-lg font-bold text-xs">Ajouter</button>
+        </form>
+        <div class="flex flex-wrap gap-1.5 pt-2">
+            {% for r in regions %}
+            <span class="inline-flex items-center text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full border border-gray-200">
+                {{ r }}
+                <form action="{{ url_for('settings') }}" method="POST" class="inline ml-1.5">
+                    <input type="hidden" name="action" value="delete_region">
+                    <input type="hidden" name="region_name" value="{{ r }}">
+                    <button type="submit" class="text-red-500 font-bold hover:text-red-700">×</button>
+                </form>
+            </span>
+            {% endfor %}
         </div>
-        {% endfor %}
-        <button type="submit" class="w-full bg-[#7D1242] text-white py-3 rounded-xl font-bold shadow-md mt-4">
-            Mettre à jour les emplacements
-        </button>
-    </form>
+    </div>
+
+    <!-- DOMAINES -->
+    <div class="bg-white p-4 rounded-xl shadow-sm space-y-3">
+        <h3 class="font-bold text-sm text-gray-800">🏛️ Liste des Domaines</h3>
+        <form action="{{ url_for('settings') }}" method="POST" class="flex space-x-2">
+            <input type="hidden" name="action" value="add_domaine">
+            <input type="text" name="new_domaine" placeholder="Nouveau domaine..." class="w-full border rounded p-2 text-sm" required>
+            <button type="submit" class="bg-[#7D1242] text-white px-3 rounded-lg font-bold text-xs">Ajouter</button>
+        </form>
+        <div class="flex flex-wrap gap-1.5 pt-2">
+            {% for d in domaines %}
+            <span class="inline-flex items-center text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full border border-gray-200">
+                {{ d }}
+                <form action="{{ url_for('settings') }}" method="POST" class="inline ml-1.5">
+                    <input type="hidden" name="action" value="delete_domaine">
+                    <input type="hidden" name="domaine_name" value="{{ d }}">
+                    <button type="submit" class="text-red-500 font-bold hover:text-red-700">×</button>
+                </form>
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+
 </div>
 {% endblock %}
