@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="space-y-4">
+    <h2 class="text-2xl font-bold text-[#7D1242]">Tableau de Bord</h2>
+    
+    <div class="grid grid-cols-2 gap-4">
+        <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-[#7D1242]">
+            <p class="text-xs text-gray-500">Références</p>
+            <p class="text-2xl font-bold text-gray-800">{{ total_references }}</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-[#7D1242]">
+            <p class="text-xs text-gray-500">Bouteilles totales</p>
+            <p class="text-2xl font-bold text-gray-800">{{ total_bouteilles }}</p>
+        </div>
+    </div>
+
+    <div class="bg-white p-4 rounded-xl shadow-sm">
+        <h3 class="font-bold text-gray-700 mb-3">📍 Stock par Emplacement</h3>
+        <ul class="space-y-2">
+            {% for loc, qte in stock_loc.items() %}
+            <li class="flex justify-between items-center border-b pb-2">
+                <span class="text-sm text-gray-600">{{ loc }}</span>
+                <span class="font-bold text-[#7D1242]">{{ qte | int }} bts</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
