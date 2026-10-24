@@ -1,102 +1,112 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="space-y-4">
-    <div class="flex justify-between items-center">
-        <div>
-            <h2 class="font-serif text-2xl font-bold text-gradient">Éditer le Vin</h2>
-            <p class="text-xs text-gray-400">Modifier les informations ou ajuster le stock</p>
+<div class="space-y-8 max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="border-b border-sand-200 pb-6">
+        <div class="flex justify-between items-end">
+            <div class="space-y-1">
+                <h2 class="serif-title text-3xl font-bold italic text-british-900 leading-none">Modifier la fiche</h2>
+                <p class="text-xs font-mono uppercase tracking-widest text-muted mt-1">{{ wine.Domaine }} — {{ wine.Vin }}</p>
+            </div>
+            <a href="{{ url_for('stock') }}" class="text-[10px] font-mono uppercase tracking-widest text-muted hover:text-british-500 transition">Annuler</a>
         </div>
-        <a href="{{ url_for('stock') }}" class="text-xs text-gray-400 hover:text-white">← Annuler</a>
     </div>
 
-    <form action="{{ url_for('edit_wine', wine_id=wine.id) }}" method="POST" class="glass-card p-4.5 rounded-2xl space-y-3.5 border border-wine-200/10 shadow-2xl">
-        <div>
-            <label class="block text-[11px] font-semibold text-gray-300 mb-1">🌍 Région</label>
-            <input list="regions_list" name="region" value="{{ wine.get('Région', '') }}" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white focus:border-gold-500" required>
-            <datalist id="regions_list">
-                {% for r in regions %}
-                <option value="{{ r }}">
-                {% endfor %}
-            </datalist>
-        </div>
-
-        <div>
-            <label class="block text-[11px] font-semibold text-gray-300 mb-1">🏛️ Domaine / Château</label>
-            <input list="domaines_list" name="domaine" value="{{ wine.get('Domaine', '') }}" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white focus:border-gold-500" required>
-            <datalist id="domaines_list">
-                {% for d in domaines %}
-                <option value="{{ d }}">
-                {% endfor %}
-            </datalist>
-        </div>
-
-        <div>
-            <label class="block text-[11px] font-semibold text-gray-300 mb-1">🍾 Nom de la Cuvée / Appellation</label>
-            <input list="cuvees_list" name="vin" value="{{ wine.get('Vin', '') }}" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white focus:border-gold-500" required>
-            <datalist id="cuvees_list">
-                {% for c in cuvees %}
-                <option value="{{ c }}">
-                {% endfor %}
-            </datalist>
-        </div>
-
-        <!-- FORMAT ANNÉES EN ENTIER (4 chiffres) -->
-        <div class="grid grid-cols-3 gap-2">
-            <div>
-                <label class="block text-[10px] font-semibold text-gray-300 mb-1">📅 Millésime</label>
-                <input type="number" name="millesime" value="{{ wine.get('Millesime', 2020) }}" min="1900" max="2100" step="1" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2 text-xs text-white text-center font-bold" required>
+    <form action="{{ url_for('edit_wine', wine_id=wine.id) }}" method="POST" class="paper-card p-8 rounded-sm space-y-8">
+        <!-- Identité -->
+        <div class="space-y-6">
+            <h4 class="text-[11px] font-mono uppercase tracking-widest text-british-500 border-b border-sand-200 pb-2">Identité</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-ink/60 uppercase tracking-wider">🌍 Région</label>
+                    <input list="regions_list" name="region" value="{{ wine.get('Région', '') }}" class="w-full bg-paper border border-sand-200 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-british-500" required>
+                    <datalist id="regions_list">
+                        {% for r in regions %}
+                        <option value="{{ r }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-ink/60 uppercase tracking-wider">🏛️ Domaine</label>
+                    <input list="domaines_list" name="domaine" value="{{ wine.get('Domaine', '') }}" class="w-full bg-paper border border-sand-200 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-british-500" required>
+                    <datalist id="domaines_list">
+                        {% for d in domaines %}
+                        <option value="{{ d }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
             </div>
-            <div>
-                <label class="block text-[10px] font-semibold text-gray-300 mb-1">⏳ Boire Min</label>
-                <input type="number" name="boire_min" value="{{ wine.get('Boire Min', 2024) }}" min="1900" max="2100" step="1" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2 text-xs text-white text-center font-bold" required>
-            </div>
-            <div>
-                <label class="block text-[10px] font-semibold text-gray-300 mb-1">⏳ Boire Max</label>
-                <input type="number" name="boire_max" value="{{ wine.get('Boire Max', 2030) }}" min="1900" max="2100" step="1" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2 text-xs text-white text-center font-bold" required>
+            <div class="space-y-2">
+                <label class="block text-xs font-bold text-ink/60 uppercase tracking-wider">🍾 Cuvée</label>
+                <input list="cuvees_list" name="vin" value="{{ wine.get('Vin', '') }}" class="w-full bg-paper border border-sand-200 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-british-500" required>
+                <datalist id="cuvees_list">
+                    {% for c in cuvees %}
+                    <option value="{{ c }}">
+                    {% endfor %}
+                </datalist>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
-            <div>
-                <label class="block text-[11px] font-semibold text-gray-300 mb-1">💰 Prix Unitaire (PU)</label>
-                <input type="text" name="pu" value="{{ wine.get('PU', '') }}" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white">
+        <!-- Caractéristiques -->
+        <div class="space-y-6">
+            <h4 class="text-[11px] font-mono uppercase tracking-widest text-british-500 border-b border-sand-200 pb-2">Maturité & Prix</h4>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-bold text-ink/60 uppercase">📅 Millésime</label>
+                    <input type="number" name="millesime" value="{{ wine.get('Millesime', 2020) }}" class="w-full bg-paper border border-sand-200 rounded-sm px-3 py-3 text-sm text-center font-mono focus:border-british-500" required>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-bold text-ink/60 uppercase">⏳ Boire Min</label>
+                    <input type="number" name="boire_min" value="{{ wine.get('Boire Min', 2024) }}" class="w-full bg-paper border border-sand-200 rounded-sm px-3 py-3 text-sm text-center font-mono focus:border-british-500" required>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-bold text-ink/60 uppercase">⏳ Boire Max</label>
+                    <input type="number" name="boire_max" value="{{ wine.get('Boire Max', 2030) }}" class="w-full bg-paper border border-sand-200 rounded-sm px-3 py-3 text-sm text-center font-mono focus:border-british-500" required>
+                </div>
             </div>
-            <div>
-                <label class="block text-[11px] font-semibold text-gray-300 mb-1">🏷️ Statut</label>
-                <select name="statut" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-gold-300 font-bold focus:border-gold-500">
-                    <option value="A boire" {% if wine.get('Statut') == 'A boire' %}selected{% endif %}>À boire</option>
-                    <option value="Garde" {% if wine.get('Statut') == 'Garde' %}selected{% endif %}>Garde</option>
-                    <option value="Apogée" {% if wine.get('Statut') == 'Apogée' %}selected{% endif %}>Apogée</option>
-                </select>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-ink/60 uppercase tracking-wider">💰 Prix (PU)</label>
+                    <input type="text" name="pu" value="{{ wine.get('PU', '') }}" class="w-full bg-paper border border-sand-200 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-british-500">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-ink/60 uppercase tracking-wider">🏷️ Statut</label>
+                    <select name="statut" class="w-full bg-paper border border-sand-200 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-british-500">
+                        <option value="A boire" {% if wine.get('Statut') == 'A boire' %}selected{% endif %}>À boire</option>
+                        <option value="Garde" {% if wine.get('Statut') == 'Garde' %}selected{% endif %}>Garde</option>
+                        <option value="Apogée" {% if wine.get('Statut') == 'Apogée' %}selected{% endif %}>Apogée</option>
+                    </select>
+                </div>
             </div>
         </div>
 
-        <div class="pt-2 border-t border-wine-200/10">
-            <h3 class="text-xs font-bold text-gold-300 mb-2">📍 Quantités par emplacement :</h3>
-            <div class="grid grid-cols-3 gap-2">
+        <!-- Stock -->
+        <div class="space-y-6">
+            <h4 class="text-[11px] font-mono uppercase tracking-widest text-british-500 border-b border-sand-200 pb-2">Ajustement du Stock</h4>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {% for loc in locations %}
-                <div class="bg-wine-950/60 p-2 rounded-xl border border-wine-500/10 text-center">
-                    <label class="block text-[10px] text-gray-400 font-medium truncate mb-1">{{ loc }}</label>
-                    <input type="number" step="1" name="qty_{{ loc }}" value="{{ wine.get(loc, 0) | int }}" class="w-full bg-wine-900 border border-wine-200/20 rounded-lg p-1.5 text-center text-xs font-bold text-gold-300">
+                <div class="p-4 bg-sand-50 border border-sand-200 rounded-sm space-y-2">
+                    <label class="block text-[10px] font-bold text-muted uppercase truncate text-center">{{ loc }}</label>
+                    <input type="number" step="1" name="qty_{{ loc }}" value="{{ wine.get(loc, 0) | int }}" class="w-full bg-white border border-sand-200 rounded-sm py-2 text-center text-sm font-mono font-bold text-british-500 focus:border-british-500">
                 </div>
                 {% endfor %}
             </div>
         </div>
 
-        <button type="submit" class="w-full bg-gradient-to-r from-gold-600 to-gold-500 text-wine-950 py-3 rounded-xl font-extrabold text-xs shadow-lg shadow-gold-500/20 hover:brightness-110">
-            💾 Enregistrer les modifications
+        <button type="submit" class="w-full bg-british-500 text-white py-4 rounded-sm font-bold text-sm hover:bg-british-700 transition uppercase tracking-widest">
+            Sauvegarder les modifications
         </button>
     </form>
 
-    <div class="glass-card p-4 rounded-2xl border border-red-500/20 flex justify-between items-center">
-        <div>
-            <p class="text-xs font-bold text-red-300">Zone dangereuse</p>
-            <p class="text-[10px] text-gray-400">Supprimer définitivement ce vin</p>
+    <!-- Zone Danger -->
+    <div class="p-6 border border-red-100 bg-red-50/30 rounded-sm flex justify-between items-center">
+        <div class="space-y-1">
+            <p class="text-xs font-bold text-red-800 uppercase tracking-wider">Zone de retrait</p>
+            <p class="text-[10px] text-red-600/70 uppercase font-mono">Supprimer définitivement la référence</p>
         </div>
-        <form action="{{ url_for('delete_wine', wine_id=wine.id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette fiche ?')">
-            <button type="submit" class="text-xs bg-red-950 text-red-300 border border-red-500/30 px-3 py-1.5 rounded-xl font-bold hover:bg-red-900 transition">
-                🗑️ Supprimer
-            </button>
+        <form action="{{ url_for('delete_wine', wine_id=wine.id) }}" method="POST" onsubmit="return confirm('Confirmer la suppression ?')">
+            <button type="submit" class="bg-white border border-red-200 text-red-700 px-4 py-2 rounded-sm text-xs font-bold hover:bg-red-700 hover:text-white transition">Supprimer</button>
         </form>
     </div>
 </div>

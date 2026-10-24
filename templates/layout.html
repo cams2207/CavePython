@@ -3,23 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mon Chai - Gestion de Cave</title>
+    <title>Mon Chai — Registre de Cave</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Newsreader', 'serif'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
                     },
                     colors: {
-                        wine: {
-                            50: '#FAF2F4', 100: '#F5E4E8', 200: '#EABEC7', 500: '#A31B38', 700: '#580C1E', 800: '#3D0512', 900: '#25020A',
+                        paper: '#F9F8F6',
+                        ink: '#2D2D2D',
+                        british: {
+                            50: '#F2F5F4', 100: '#E1E9E6', 500: '#1A3026', 700: '#12221B', 900: '#0A1410',
                         },
-                        gold: {
-                            100: '#FDF7E7', 300: '#EBD292', 500: '#C89B3C', 600: '#A87C24',
+                        sand: {
+                            100: '#F2F0ED', 200: '#E5E2DE', 300: '#D1CCC5',
                         }
                     }
                 }
@@ -28,53 +33,57 @@
     </script>
     <style>
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #0F080A;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(88, 12, 30, 0.35) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(200, 155, 60, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
-            color: #E2E8F0;
+            font-family: 'Inter', sans-serif;
+            background-color: #F9F8F6;
+            color: #2D2D2D;
+            -webkit-font-smoothing: antialiased;
         }
-        .glass-card {
-            background: rgba(30, 18, 22, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(234, 190, 199, 0.12);
+        .paper-card {
+            background: #FFFFFF;
+            border: 1px solid #E5E2DE;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
-        .glass-nav {
-            background: rgba(20, 10, 13, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(234, 190, 199, 0.15);
+        .serif-title {
+            font-family: 'Newsreader', serif;
+            letter-spacing: -0.01em;
         }
-        .text-gradient {
-            background: linear-gradient(135deg, #FFF 0%, #EBD292 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .data-mono {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        /* Custom scrollbar for desktop */
+        @media (min-width: 1024px) {
+            ::-webkit-scrollbar { width: 8px; }
+            ::-webkit-scrollbar-track { background: #F9F8F6; }
+            ::-webkit-scrollbar-thumb { background: #E5E2DE; border-radius: 4px; }
+            ::-webkit-scrollbar-thumb:hover { background: #D1CCC5; }
         }
     </style>
 </head>
-<body class="min-h-screen pb-28">
-    <header class="sticky top-0 z-40 px-4 py-3.5 glass-nav border-b border-wine-200/10 flex justify-between items-center shadow-lg">
-        <div class="flex items-center space-x-2.5">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-wine-700 to-wine-500 flex items-center justify-center shadow-md shadow-wine-900/50 border border-gold-300/30">
-                <span class="text-lg">🍷</span>
+<body class="min-h-screen pb-32 lg:pb-12 lg:pt-8">
+    <header class="sticky top-0 z-40 bg-paper/80 backdrop-blur-md border-b border-sand-200 px-6 py-4 flex justify-between items-center max-w-5xl mx-auto lg:rounded-t-2xl lg:mt-4">
+        <div class="flex items-center space-x-4">
+            <div class="w-10 h-10 bg-british-500 flex items-center justify-center rounded-sm">
+                <span class="text-white text-xl">❦</span>
             </div>
             <div>
-                <h1 class="font-serif font-bold text-lg text-gradient leading-none">Mon Chai</h1>
-                <p class="text-[10px] text-gold-300/80 font-medium tracking-wide">Cave Sommelier</p>
+                <h1 class="serif-title font-bold text-xl leading-none text-british-900">Mon Chai</h1>
+                <p class="text-[10px] font-mono uppercase tracking-widest text-british-500 mt-1">Registre de Cave</p>
             </div>
         </div>
-        <span class="text-[11px] bg-wine-800/80 text-wine-200 px-2.5 py-1 rounded-full border border-wine-500/20">Mode Test</span>
+        <div class="hidden lg:flex items-center space-x-8 text-sm font-medium text-ink/60">
+            <a href="{{ url_for('index') }}" class="hover:text-british-500 transition {% if active_tab == 'dashboard' %}text-british-500 font-bold{% endif %}">Tableau</a>
+            <a href="{{ url_for('stock') }}" class="hover:text-british-500 transition {% if active_tab == 'stock' %}text-british-500 font-bold{% endif %}">Inventaire</a>
+            <a href="{{ url_for('history') }}" class="hover:text-british-500 transition {% if active_tab == 'history' %}text-british-500 font-bold{% endif %}">Historique</a>
+            <a href="{{ url_for('settings') }}" class="hover:text-british-500 transition {% if active_tab == 'settings' %}text-british-500 font-bold{% endif %}">Réglages</a>
+        </div>
     </header>
 
-    <div class="max-w-md mx-auto mt-3 px-4">
+    <div class="max-w-5xl mx-auto px-6 mt-6">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="p-3.5 mb-2 rounded-2xl text-xs font-semibold backdrop-blur-md flex items-center space-x-2 shadow-lg {% if category == 'error' %}bg-red-900/80 text-red-200 border border-red-500/30{% else %}bg-emerald-950/80 text-emerald-200 border border-emerald-500/30{% endif %}">
-                        <span>{% if category == 'error' %}⚠️{% else %}✨{% endif %}</span>
+                    <div class="p-4 mb-6 border text-sm flex items-center space-x-3 {% if category == 'error' %}bg-red-50 border-red-200 text-red-800{% else %}bg-british-50 border-british-100 text-british-900{% endif %}">
+                        <span>{% if category == 'error' %}✕{% else %}✓{% endif %}</span>
                         <span>{{ message }}</span>
                     </div>
                 {% endfor %}
@@ -82,33 +91,30 @@
         {% endwith %}
     </div>
 
-    <main class="max-w-md mx-auto px-4 mt-2">
+    <main class="max-w-5xl mx-auto px-6">
         {% block content %}{% endblock %}
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 glass-nav shadow-2xl py-2 z-50">
-        <div class="max-w-md mx-auto flex justify-around items-center">
-            <a href="{{ url_for('index') }}" class="flex flex-col items-center py-1 px-2 rounded-xl transition {% if active_tab == 'dashboard' %}text-gold-300 font-bold scale-105{% else %}text-gray-400 hover:text-gray-200{% endif %}">
-                <span class="text-lg">📊</span>
-                <span class="text-[10px] mt-0.5">Stats</span>
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-sand-200 py-3 z-50 lg:hidden">
+        <div class="flex justify-around items-center">
+            <a href="{{ url_for('index') }}" class="flex flex-col items-center space-y-1 {% if active_tab == 'dashboard' %}text-british-500{% else %}text-ink/40{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <span class="text-[10px] font-mono uppercase tracking-tighter">Tableau</span>
             </a>
-            <a href="{{ url_for('stock') }}" class="flex flex-col items-center py-1 px-2 rounded-xl transition {% if active_tab == 'stock' %}text-gold-300 font-bold scale-105{% else %}text-gray-400 hover:text-gray-200{% endif %}">
-                <span class="text-lg">🍾</span>
-                <span class="text-[10px] mt-0.5">Cave</span>
+            <a href="{{ url_for('stock') }}" class="flex flex-col items-center space-y-1 {% if active_tab == 'stock' %}text-british-500{% else %}text-ink/40{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                <span class="text-[10px] font-mono uppercase tracking-tighter">Cave</span>
             </a>
-            <a href="{{ url_for('add_wine') }}" class="flex flex-col items-center py-1 px-2 rounded-xl transition {% if active_tab == 'add' %}text-gold-300 font-bold scale-105{% else %}text-gray-400 hover:text-gray-200{% endif %}">
-                <div class="w-10 h-10 -mt-4 bg-gradient-to-tr from-gold-600 to-gold-300 rounded-full flex items-center justify-center text-wine-900 shadow-lg shadow-gold-500/20 border-2 border-wine-900">
-                    <span class="text-xl font-extrabold">+</span>
-                </div>
-                <span class="text-[10px] mt-0.5 text-gold-300 font-medium">Ajouter</span>
+            <a href="{{ url_for('add_wine') }}" class="relative -mt-10 bg-british-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg border-4 border-paper">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
             </a>
-            <a href="{{ url_for('history') }}" class="flex flex-col items-center py-1 px-2 rounded-xl transition {% if active_tab == 'history' %}text-gold-300 font-bold scale-105{% else %}text-gray-400 hover:text-gray-200{% endif %}">
-                <span class="text-lg">🍷</span>
-                <span class="text-[10px] mt-0.5">Bus</span>
+            <a href="{{ url_for('history') }}" class="flex flex-col items-center space-y-1 {% if active_tab == 'history' %}text-british-500{% else %}text-ink/40{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="text-[10px] font-mono uppercase tracking-tighter">Bus</span>
             </a>
-            <a href="{{ url_for('settings') }}" class="flex flex-col items-center py-1 px-2 rounded-xl transition {% if active_tab == 'settings' %}text-gold-300 font-bold scale-105{% else %}text-gray-400 hover:text-gray-200{% endif %}">
-                <span class="text-lg">⚙️</span>
-                <span class="text-[10px] mt-0.5">Réglages</span>
+            <a href="{{ url_for('settings') }}" class="flex flex-col items-center space-y-1 {% if active_tab == 'settings' %}text-british-500{% else %}text-ink/40{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span class="text-[10px] font-mono uppercase tracking-tighter">Réglages</span>
             </a>
         </div>
     </nav>

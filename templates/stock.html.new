@@ -1,0 +1,149 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="space-y-3.5">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+        <div>
+            <h2 class="font-serif text-2xl font-bold text-gradient">Ma Cave</h2>
+            <p class="text-xs text-gray-400">{{ wines|length }} référence(s) affichée(s)</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('export_excel') }}" class="text-xs bg-wine-600/30 text-wine-200 border border-wine-400/30 px-3 py-1.5 rounded-xl font-bold hover:bg-wine-600/50 transition flex items-center space-x-1">
+                <span>📤</span> <span>Exporter</span>
+            </a>
+            <a href="{{ url_for('add_wine') }}" class="text-xs bg-gold-500/20 text-gold-300 border border-gold-500/30 px-3 py-1.5 rounded-xl font-bold hover:bg-gold-500/30 transition flex items-center space-x-1">
+                <span>+</span> <span>Nouveau Vin</span>
+            </a>
+        </div>
+    </div>
+
+    <form action="{{ url_for('stock') }}" method="GET" class="space-y-2">
+        <div class="relative">
+            <input type="text" name="q" value="{{ query }}" placeholder="🔍 Domaine, vin, millésime, région..." 
+                   class="w-full pl-9 pr-8 py-2.5 bg-wine-900/50 border border-wine-200/20 rounded-xl text-xs text-white placeholder-gray-400 focus:outline-none focus:border-gold-500/60 shadow-inner">
+            <span class="absolute left-3 top-2.5 text-xs opacity-50">🔍</span>
+            {% if query or selected_region or selected_statut or selected_location or sort_by != 'millesime_desc' %}
+            <a href="{{ url_for('stock') }}" class="absolute right-2.5 top-2 text-[10px] bg-wine-800/80 text-wine-200 px-2 py-1 rounded-lg">Reset</a>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px]">
+            <select name="region" onchange="this.form.submit()" class="bg-wine-900/60 text-gray-200 border border-wine-200/20 px-2 py-2 rounded-xl font-medium focus:outline-none">
+                <option value="">🌍 Toutes Régions</option>
+                {% for r in regions %}
+                <option value="{{ r }}" {% if selected_region == r %}selected{% endif %}>{{ r }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="location" onchange="this.form.submit()" class="bg-wine-900/60 text-gray-200 border border-wine-200/20 px-2 py-2 rounded-xl font-medium focus:outline-none">
+                <option value="">📍 Tous Emplacements</option>
+                {% for loc in locations %}
+                <option value="{{ loc }}" {% if selected_location == loc %}selected{% endif %}>{{ loc }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="statut" onchange="this.form.submit()" class="bg-wine-900/60 text-gray-200 border border-wine-200/20 px-2 py-2 rounded-xl font-medium focus:outline-none">
+                <option value="">🏷️ Tous Statuts</option>
+                <option value="A boire" {% if selected_statut == 'A boire' %}selected{% endif %}>À boire</option>
+                <option value="Garde" {% if selected_statut == 'Garde' %}selected{% endif %}>Garde</option>
+                <option value="Apogée" {% if selected_statut == 'Apogée' %}selected{% endif %}>Apogée</option>
+            </select>
+
+            <select name="sort" onchange="this.form.submit()" class="bg-wine-900/60 text-gold-300 border border-gold-500/30 px-2 py-2 rounded-xl font-bold focus:outline-none">
+                <option value="millesime_desc" {% if sort_by == 'millesime_desc' %}selected{% endif %}>📅 Millésime (Récent)</option>
+                <option value="millesime_asc" {% if sort_by == 'millesime_asc' %}selected{% endif %}>📅 Millésime (Ancien)</option>
+                <option value="domaine_asc" {% if sort_by == 'domaine_asc' %}selected{% endif %}>🏛️ Domaine (A-Z)</option>
+                <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>💰 Prix (Décroissant)</option>
+                <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>💰 Prix (Croissant)</option>
+            </select>
+        </div>
+    </form>
+
+    <div class="space-y-3">
+        {% for wine in wines %}
+        {% set current_year = now.year if now else 2024 %}
+        {% set boire_min = wine.get('Boire Min', current_year) | int %}
+        {% set boire_max = wine.get('Boire Max', current_year) | int %}
+        {% set dans_apogee = boire_min <= current_year and current_year <= boire_max and wine.get('total_qty', 0) > 0 %}
+        {% set proche_apogee = not dans_apogee and boire_min <= current_year + 1 and current_year < boire_min and wine.get('total_qty', 0) > 0 %}
+        <div class="glass-card rounded-2xl p-4 relative border border-wine-200/10 hover:border-gold-500/30 transition shadow-xl {% if dans_apogee %}ring-1 ring-gold-500/50{% endif %}">
+            <div class="flex justify-between items-start mb-2">
+                <div class="flex flex-wrap gap-1.5 items-center">
+                    <span class="text-[10px] font-bold uppercase tracking-wider bg-wine-500/30 text-wine-200 border border-wine-500/40 px-2 py-0.5 rounded-md">
+                        {{ wine.Région }}
+                    </span>
+                    {% if wine.Statut == 'A boire' %}
+                    <span class="text-[10px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md shadow-[0_0_10px_rgba(16,185,129,0.3)]">🔥 À boire</span>
+                    {% elif wine.Statut == 'Apogée' %}
+                    <span class="text-[10px] font-bold bg-gold-600/30 text-gold-300 border border-gold-500/40 px-2 py-0.5 rounded-md shadow-[0_0_10px_rgba(235,210,146,0.3)]">✨ Apogée</span>
+                    {% else %}
+                    <span class="text-[10px] font-bold bg-blue-950/80 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-md">⏳ Garde</span>
+                    {% endif %}
+                    {% if dans_apogee %}
+                    <span class="text-[10px] font-bold bg-red-600/30 text-red-300 border border-red-500/40 px-2 py-0.5 rounded-md animate-pulse">🍷 PRÊT</span>
+                    {% elif proche_apogee %}
+                    <span class="text-[10px] font-bold bg-amber-600/30 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-md">⏰ Bientôt</span>
+                    {% endif %}
+                </div>
+
+                <!-- ACTIONS : Bouton Éditer + Poubelle de Suppression -->
+                <div class="flex items-center space-x-1.5">
+                    <a href="{{ url_for('edit_wine', wine_id=wine.id) }}" class="text-xs bg-gold-500/10 text-gold-300 border border-gold-500/30 px-2.5 py-1 rounded-xl font-medium hover:bg-gold-500/20 transition flex items-center space-x-1">
+                        <span>✏️</span> <span>Éditer</span>
+                    </a>
+                    <form action="{{ url_for('delete_wine', wine_id=wine.id) }}" method="POST" onsubmit="return confirm('Supprimer définitivement {{ wine.Domaine }} {{ wine.Vin }} ?')">
+                        <button type="submit" class="text-xs bg-red-950/80 text-red-300 border border-red-500/30 w-7 h-7 rounded-xl font-bold flex items-center justify-center hover:bg-red-900 transition" title="Supprimer">
+                            🗑️
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h3 class="font-serif text-base font-bold text-white leading-tight">{{ wine.Domaine }}</h3>
+                <p class="text-xs text-gold-300/90 font-medium">{{ wine.Vin }}</p>
+                <div class="flex justify-between items-center text-[11px] text-gray-400 mt-1.5 pt-1.5 border-t border-wine-200/10">
+                    <span>Millésime : <strong class="text-white">{{ wine.Millesime }}</strong></span>
+                    <span>Apogée : <strong class="text-gray-300">{{ boire_min }} - {{ boire_max }}</strong></span>
+                    {% if wine.PU %}<span class="text-gold-300 font-semibold">{{ wine.PU }}</span>{% endif %}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 bg-wine-950/60 p-2.5 rounded-xl border border-wine-200/10">
+                {% for loc in locations %}
+                {% set qty = wine.get(loc, 0) | float %}
+                <div class="text-center bg-wine-900/40 p-2 rounded-lg border border-wine-500/10 flex flex-col justify-between">
+                    <div>
+                        <p class="text-[9px] text-gray-400 font-medium truncate">{{ loc }}</p>
+                        <p class="text-sm font-extrabold text-white mt-0.5">{{ qty | int }} <span class="text-[9px] font-normal text-gray-400">bts</span></p>
+                    </div>
+                    {% if qty > 0 %}
+                    <button type="button" onclick="openBuModal('{{ wine.id }}', '{{ wine.Domaine | escape }}', '{{ wine.Vin | escape }}', '{{ loc | escape }}')" 
+                            class="mt-1.5 w-full text-[10px] bg-gradient-to-r from-wine-700 to-wine-500 text-white py-1 rounded-lg font-bold shadow-md hover:from-wine-600 hover:to-wine-400 transition">
+                        🍷 Consommer
+                    </button>
+                    {% else %}
+                    <span class="mt-1.5 text-[9px] text-gray-600 font-semibold py-0.5">Épuisé</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="glass-card rounded-2xl p-8 text-center space-y-2">
+            <span class="text-4xl">🍇</span>
+            <p class="text-sm font-semibold text-gray-300">Aucune bouteille ne correspond à vos critères.</p>
+            <a href="{{ url_for('stock') }}" class="inline-block text-xs text-gold-300 font-bold underline mt-1">Effacer les filtres</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+{% if request.args.get('consommer') %}
+    document.addEventListener('DOMContentLoaded', function() {
+        // Petit effet visuel pour indiquer que le FAB a été cliqué
+        console.log('Prêt à consommer');
+    });
+{% endif %}
+</script>
+{% endblock %}

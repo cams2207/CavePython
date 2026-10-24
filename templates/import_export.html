@@ -1,26 +1,44 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="space-y-4">
-    <div>
-        <h2 class="font-serif text-2xl font-bold text-gradient">Import / Export</h2>
-        <p class="text-xs text-gray-400">Sauvegardes et synchronisation Excel</p>
+<div class="space-y-8 max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="border-b border-sand-200 pb-6">
+        <h2 class="serif-title text-3xl font-bold italic text-british-900 leading-none">Import / Export</h2>
+        <p class="text-xs font-mono uppercase tracking-widest text-muted mt-1">Sauvegardes et synchronisation Excel</p>
     </div>
 
-    <div class="glass-card p-4.5 rounded-2xl space-y-3 border border-wine-200/10">
-        <h3 class="font-bold text-xs text-gold-300 uppercase tracking-wider">📤 Exporter la cave</h3>
-        <p class="text-xs text-gray-300">Téléchargez vos données actuelles au format Excel (.xlsx).</p>
-        <a href="{{ url_for('export_excel') }}" class="block text-center bg-gradient-to-r from-gold-600 to-gold-500 text-wine-950 py-3 rounded-xl font-extrabold text-xs shadow-lg">
-            📥 Télécharger Cave.xlsx
+    <!-- Export -->
+    <div class="paper-card p-8 rounded-sm space-y-4">
+        <div class="flex items-center space-x-3 text-british-900">
+            <span class="text-2xl">📥</span>
+            <h3 class="serif-title text-xl font-bold italic">Exporter la cave</h3>
+        </div>
+        <p class="text-sm text-ink/70 leading-relaxed">
+            Téléchargez l'intégralité de votre registre au format Microsoft Excel (.xlsx) pour archivage ou consultation hors-ligne.
+        </p>
+        <a href="{{ url_for('export_excel') }}" class="block w-full text-center bg-british-500 text-white py-4 rounded-sm font-bold text-sm uppercase tracking-widest shadow-md hover:bg-british-700 transition">
+            Télécharger le fichier .xlsx
         </a>
     </div>
 
-    <div class="glass-card p-4.5 rounded-2xl space-y-3 border border-wine-200/10">
-        <h3 class="font-bold text-xs text-gold-300 uppercase tracking-wider">📥 Importer un fichier Excel</h3>
-        <p class="text-xs text-gray-300">Importez directement votre fichier Excel. L'onglet <strong>Cave</strong> sera chargé.</p>
-        <form action="{{ url_for('import_export') }}" method="POST" enctype="multipart/form-data" class="space-y-3">
-            <input type="file" name="file" accept=".xlsx, .xls" class="w-full text-xs text-gray-300 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-wine-800 file:text-gold-300 hover:file:bg-wine-700">
-            <button type="submit" class="w-full bg-wine-800 border border-wine-500/30 text-white py-3 rounded-xl font-bold text-xs">
-                Valider l'importation
+    <!-- Import -->
+    <div class="paper-card p-8 rounded-sm space-y-6">
+        <div class="flex items-center space-x-3 text-british-900">
+            <span class="text-2xl">📤</span>
+            <h3 class="serif-title text-xl font-bold italic">Importer un fichier</h3>
+        </div>
+        <p class="text-sm text-ink/70 leading-relaxed">
+            Mettez à jour votre cave en téléchargeant un fichier Excel. Le système recherchera un onglet nommé <strong class="text-british-500">"Cave"</strong>.
+        </p>
+        
+        <form action="{{ url_for('import_export') }}" method="POST" enctype="multipart/form-data" class="space-y-4 pt-4 border-t border-sand-200">
+            <div class="space-y-2">
+                <label class="block text-[10px] font-mono uppercase tracking-widest text-muted">Sélectionner le fichier</label>
+                <input type="file" name="file" accept=".xlsx, .xls" class="block w-full text-sm text-muted file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-xs file:font-bold file:bg-sand-100 file:text-british-700 hover:file:bg-sand-200 cursor-pointer">
+            </div>
+            
+            <button type="submit" class="w-full bg-paper border border-british-500 text-british-500 py-3 rounded-sm font-bold text-xs uppercase tracking-widest hover:bg-british-500 hover:text-white transition">
+                Lancer l'importation
             </button>
         </form>
     </div>

@@ -159,7 +159,8 @@ def index():
                            stock_loc=stock_loc,
                            stock_reg=stock_reg,
                            recent_bu=recent_bu,
-                           active_tab='dashboard')
+                           active_tab='dashboard',
+                           now=datetime.now().strftime("%d/%m/%Y"))
 
 @app.route('/stock')
 def stock():

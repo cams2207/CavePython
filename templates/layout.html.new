@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mon Chai - Gestion de Cave</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    },
+                    colors: {
+                        wine: {
+                            50: '#FAF2F4', 100: '#F5E4E8', 200: '#EABEC7', 500: '#A31B38', 700: '#580C1E', 800: '#3D0512', 900: '#25020A',
+                        },
+                        gold: {
+                            100: '#FDF7E7', 300: '#EBD292', 500: '#C89B3C', 600: '#A87C24',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0F080A;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(88, 12, 30, 0.35) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(200, 155, 60, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #E2E8F0;
+        }
+        .glass-card {
+            background: rgba(30, 18, 22, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(234, 190, 199, 0.12);
+        }
+        .glass-nav {
+            background: rgba(20, 10, 13, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(234, 190, 199, 0.15);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #FFF 0%, #EBD292 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .ripple-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple-effect::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255,255,255,0.4);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%, -50%);
+            transform-origin: 50% 50%;
+        }
+        .ripple-effect:active::after {
+            animation: ripple 0.4s ease-out;
+        }
+        @keyframes ripple {
+            0% { transform: scale(0, 0) translate(-50%, -50%); opacity: 1; }
+            100% { transform: scale(30, 30) translate(-50%, -50%); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-28">
+    <header class="sticky top-0 z-40 px-4 py-3.5 glass-nav border-b border-wine-200/10 flex justify-between items-center shadow-lg">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-wine-700 to-wine-500 flex items-center justify-center shadow-md shadow-wine-900/50 border border-gold-300/30">
+                <span class="text-lg">🍷</span>
+            </div>
+            <div>
+                <h1 class="font-serif font-bold text-lg text-gradient leading-none">Mon Chai</h1>
+                <p class="text-[10px] text-gold-300/80 font-medium tracking-wide">Cave Sommelier</p>
+            </div>
+        </div>
+        <span class="text-[11px] bg-gold-500/20 text-gold-300 px-2.5 py-1 rounded-full border border-gold-500/30 font-semibold">Dev</span>
+    </header>
+
+    <!-- MODAL CONSOMMATION (global) -->
+    <div id="buModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl border border-gold-500/30 transform transition-all">
+            <div class="flex justify-between items-center border-b border-wine-200/10 pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="text-xl">🍷</span>
+                    <h3 class="font-serif font-bold text-base text-gradient">Sélectionner comme Bu</h3>
+                </div>
+                <button onclick="closeBuModal()" class="text-gray-400 hover:text-white text-lg font-bold">&times;</button>
+            </div>
+            <p id="modalWineTitle" class="text-xs text-gold-300 font-semibold bg-wine-900/50 p-2.5 rounded-xl border border-wine-500/20"></p>
+            <form action="{{ url_for('mark_bu') }}" method="POST" class="space-y-3.5">
+                <input type="hidden" name="wine_id" id="modalWineId">
+                <input type="hidden" name="location" id="modalLocation">
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-300 mb-1">Évaluation / Note Sommelier</label>
+                    <select name="rating" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-gold-300 font-bold focus:outline-none focus:border-gold-500">
+                        <option value="5">⭐⭐⭐⭐⭐ Mémorable / Exceptionnel (5/5)</option>
+                        <option value="4" selected>⭐⭐⭐⭐ Très Bon Vin (4/5)</option>
+                        <option value="3">⭐⭐⭐ Correct / Sympa (3/5)</option>
+                        <option value="2">⭐⭐ Moyen (2/5)</option>
+                        <option value="1">⭐ Décevant / Defaut (1/5)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-300 mb-1">Avis / Notes de dégustation</label>
+                    <textarea name="note" rows="2" placeholder="Nez puissant, tannins fondus, parfait sur une viande..." class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gold-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-300 mb-1">Date de consommation</label>
+                    <input type="date" name="date_bu" id="modalDateBu" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-gold-500">
+                </div>
+                <div class="flex space-x-2 pt-2">
+                    <button type="button" onclick="closeBuModal()" class="w-1/3 bg-wine-900/60 text-gray-300 py-3 rounded-xl font-bold text-xs border border-wine-500/20">Annuler</button>
+                    <button type="submit" class="w-2/3 bg-gradient-to-r from-gold-600 to-gold-500 text-wine-950 py-3 rounded-xl font-extrabold text-xs shadow-lg shadow-gold-500/20 hover:brightness-110">Confirmer (-1 btl)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto mt-3 px-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-3.5 mb-2 rounded-2xl text-xs font-semibold backdrop-blur-md flex items-center space-x-2 shadow-lg {% if category == 'error' %}bg-red-900/80 text-red-200 border border-red-500/30{% else %}bg-emerald-950/80 text-emerald-200 border border-emerald-500/30{% endif %}">
+                        <span>{% if category == 'error' %}⚠️{% else %}✨{% endif %}</span>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="max-w-md mx-auto px-4 mt-2">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- FAB DÉGUSTER (toujours visible) -->
+    <div class="fixed bottom-20 right-4 z-50">
+        <button onclick="openBuModalQuick()" class="ripple-effect bg-gradient-to-r from-wine-700 to-wine-500 text-white shadow-2xl shadow-wine-500/30 rounded-full w-16 h-16 flex items-center justify-center text-3xl font-bold hover:scale-110 transition-transform ease-out" aria-label="Consommer une bouteille">
+            🍷
+        </button>
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 glass-nav shadow-2xl py-2 z-50">
+        <div class="max-w-md mx-auto flex justify-around items-center">
+            <a href="{{ url_for('index') }}" class="flex flex-col items-center py-1 px-2 rounded-xl transition {% if active_tab == 'dashboard' %}text-gold-300 font-bold scale-105{% else %}text-gray-400 hover:text-gray-200{% endif %}">
+                <span class="text-lg">📊</span>
+                <span class="text-[10px] mt-0.5">Stats</span>
+            </a>
+            <a href="{{ url_for('stock') }}" class="flex flex-col items-center py-1 px-2 rounded-xl transition {% if active_tab == 'stock' %}text-gold-300 font-bold scale-105{% else %}text-gray-400 hover:text-gray-200{% endif %}">
+                <span class="text-lg">🍾</span>
+                <span class="text-[10px] mt-0.5">Cave</span>
+            </a>
+            <a href="{{ url_for('add_wine') }}" class="flex flex-col items-center py-1 px-2 rounded-xl transition {% if active_tab == 'add' %}text-gold-300 font-bold scale-105{% else %}text-gray-400 hover:text-gray-200{% endif %}">
+                <div class="w-10 h-10 -mt-4 bg-gradient-to-tr from-gold-600 to-gold-300 rounded-full flex items-center justify-center text-wine-900 shadow-lg shadow-gold-500/20 border-2 border-wine-900">
+                    <span class="text-xl font-extrabold">+</span>
+                </div>
+                <span class="text-[10px] mt-0.5 text-gold-300 font-medium">Ajouter</span>
+            </a>
+            <a href="{{ url_for('history') }}" class="flex flex-col items-center py-1 px-2 rounded-xl transition {% if active_tab == 'history' %}text-gold-300 font-bold scale-105{% else %}text-gray-400 hover:text-gray-200{% endif %}">
+                <span class="text-lg">📜</span>
+                <span class="text-[10px] mt-0.5">Hist.</span>
+            </a>
+            <a href="{{ url_for('settings') }}" class="flex flex-col items-center py-1 px-2 rounded-xl transition {% if active_tab == 'settings' %}text-gold-300 font-bold scale-105{% else %}text-gray-400 hover:text-gray-200{% endif %}">
+                <span class="text-lg">⚙️</span>
+                <span class="text-[10px] mt-0.5">Réglages</span>
+            </a>
+        </div>
+    </nav>
+
+    <script>
+        function openBuModalQuick() {
+            // Affiche le modal sans pré-remplir (l'utilisateur choisira depuis la cave)
+            window.location.href = "{{ url_for('stock') }}#consommer";
+        }
+        function openBuModal(id, domaine, vin, location) {
+            document.getElementById('modalWineId').value = id;
+            document.getElementById('modalLocation').value = location;
+            document.getElementById('modalWineTitle').innerText = domaine + ' — ' + vin + ' (' + location + ')';
+            document.getElementById('modalDateBu').value = new Date().toISOString().split('T')[0];
+            document.getElementById('buModal').classList.remove('hidden');
+        }
+        function closeBuModal() {
+            document.getElementById('buModal').classList.add('hidden');
+        }
+        // Fermer le modal en cliquant hors de la zone
+        document.getElementById('buModal').addEventListener('click', function(e) {
+            if (e.target === this) closeBuModal();
+        });
+    </script>
+</body>
+</html>

@@ -1,65 +1,109 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="space-y-4">
-    <div>
-        <h2 class="font-serif text-2xl font-bold text-gradient">Tableau de Bord</h2>
-        <p class="text-xs text-gray-400">Patrimoine et maturité de votre cave</p>
+<div class="space-y-10">
+    <!-- Header Page -->
+    <div class="border-b border-sand-200 pb-4">
+        <h2 class="serif-title text-3xl font-bold text-british-900 italic">Tableau de bord</h2>
+        <p class="text-xs font-mono uppercase tracking-widest text-muted mt-1">État de la cave au {{ now }}</p>
     </div>
     
-    <!-- KPI Bouteilles & Références (Valorisation retirée) -->
-    <div class="grid grid-cols-2 gap-3">
-        <div class="glass-card p-4 rounded-2xl relative overflow-hidden border border-wine-200/10">
-            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total Bouteilles</p>
-            <p class="text-3xl font-extrabold text-gold-300 mt-1">{{ total_bouteilles }}</p>
-            <p class="text-[10px] text-emerald-400 mt-1 font-medium">En stock global</p>
+    <!-- KPI Principal : Maturité -->
+    <div class="paper-card p-8 rounded-sm bg-british-500 text-paper border-none flex flex-col md:flex-row justify-between items-center md:items-end">
+        <div class="space-y-1 text-center md:text-left">
+            <span class="text-[10px] font-mono uppercase tracking-[0.2em] opacity-80">Maturité idéale</span>
+            <h3 class="serif-title text-2xl font-semibold italic leading-tight">Prêts à être dégustés</h3>
+            <p class="text-xs opacity-70">Bouteilles dans leur fenêtre de consommation</p>
         </div>
-
-        <div class="glass-card p-4 rounded-2xl relative overflow-hidden border border-wine-200/10">
-            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Références</p>
-            <p class="text-3xl font-extrabold text-white mt-1">{{ total_references }}</p>
-            <p class="text-[10px] text-wine-200 mt-1 font-medium">Cuvées uniques</p>
+        <div class="mt-6 md:mt-0 text-center md:text-right">
+            <span class="text-6xl font-bold serif-title italic leading-none">{{ ready_to_drink_count }}</span>
+            <span class="block text-[10px] font-mono uppercase tracking-widest mt-2 opacity-80">bouteilles</span>
         </div>
     </div>
 
-    <!-- Alerte Apogée / Prêt à boire -->
-    <div class="glass-card p-4 rounded-2xl flex items-center justify-between border border-gold-500/20 bg-gradient-to-r from-wine-900/60 to-wine-950/80">
-        <div class="space-y-0.5">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-gold-300 bg-gold-500/10 px-2 py-0.5 rounded">Maturité idéale</span>
-            <h3 class="font-bold text-sm text-white mt-1">Prêts à être dégustés</h3>
-            <p class="text-[11px] text-gray-300">Bouteilles actuellement dans leur fenêtre d'apogée</p>
+    <!-- Grid Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Totaux -->
+        <div class="space-y-4">
+            <h4 class="text-[11px] font-mono uppercase tracking-widest text-british-500 border-b border-sand-200 pb-2">Inventaire Global</h4>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="paper-card p-6 rounded-sm">
+                    <p class="text-[10px] font-mono uppercase tracking-widest text-muted">Stock Total</p>
+                    <p class="text-3xl serif-title font-bold text-british-900 mt-2 italic">{{ total_bouteilles }}</p>
+                </div>
+                <div class="paper-card p-6 rounded-sm">
+                    <p class="text-[10px] font-mono uppercase tracking-widest text-muted">Cuvées</p>
+                    <p class="text-3xl serif-title font-bold text-british-900 mt-2 italic">{{ total_references }}</p>
+                </div>
+            </div>
         </div>
-        <div class="text-right">
-            <span class="text-3xl font-extrabold text-gold-300">{{ ready_to_drink_count }}</span>
-            <p class="text-[10px] text-gray-400">bts</p>
+
+        <!-- Emplacements -->
+        <div class="space-y-4">
+            <h4 class="text-[11px] font-mono uppercase tracking-widest text-british-500 border-b border-sand-200 pb-2">Par Emplacement</h4>
+            <div class="paper-card divide-y divide-sand-200">
+                {% for loc, qte in stock_loc.items() %}
+                <div class="p-4 flex justify-between items-center group hover:bg-paper transition">
+                    <span class="text-sm font-medium">{{ loc }}</span>
+                    <span class="font-mono text-sm font-bold text-british-500 bg-sand-100 px-3 py-1">{{ qte | int }}</span>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 
-    <div class="glass-card p-4.5 rounded-2xl space-y-3">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-gold-300 flex items-center space-x-1.5">
-            <span>📍</span> <span>Stock par Emplacement</span>
-        </h3>
-        <div class="space-y-2">
-            {% for loc, qte in stock_loc.items() %}
-            <div class="flex justify-between items-center bg-wine-900/40 p-2.5 rounded-xl border border-wine-500/10">
-                <span class="text-xs text-gray-200 font-medium">{{ loc }}</span>
-                <span class="text-xs font-extrabold text-gold-300 bg-gold-500/10 px-2.5 py-1 rounded-lg border border-gold-500/20">{{ qte | int }} bts</span>
+    <!-- Répartition Régionale -->
+    <div class="space-y-4">
+        <h4 class="text-[11px] font-mono uppercase tracking-widest text-british-500 border-b border-sand-200 pb-2">Répartition Régionale</h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% for reg, qte in stock_reg.items()|sort(attribute='1', reverse=True) %}
+            <div class="paper-card p-4 group hover:border-british-500 transition">
+                <p class="text-[10px] font-mono uppercase tracking-tighter text-muted truncate">{{ reg }}</p>
+                <div class="flex items-baseline space-x-1 mt-1">
+                    <span class="text-xl serif-title font-bold italic">{{ qte | int }}</span>
+                    <span class="text-[9px] font-mono text-muted">BTS</span>
+                </div>
+                <!-- Mini bar d'avancement -->
+                <div class="mt-3 w-full bg-sand-100 h-0.5 overflow-hidden">
+                    <div class="bg-british-500 h-full" style="width: {{ (qte / total_bouteilles * 100) if total_bouteilles > 0 else 0 }}%"></div>
+                </div>
             </div>
             {% endfor %}
         </div>
     </div>
 
-    <div class="glass-card p-4.5 rounded-2xl space-y-3">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-gold-300 flex items-center space-x-1.5">
-            <span>🌍</span> <span>Répartition Régionale</span>
-        </h3>
-        <div class="grid grid-cols-2 gap-2">
-            {% for reg, qte in stock_reg.items() %}
-            <div class="bg-wine-900/30 p-2.5 rounded-xl border border-wine-500/10">
-                <p class="text-[10px] text-gray-400 truncate">{{ reg }}</p>
-                <p class="text-sm font-bold text-white mt-0.5">{{ qte | int }} <span class="text-[10px] font-normal text-gray-400">bts</span></p>
-            </div>
-            {% endfor %}
+    <!-- Activité Récente (Historique court) -->
+    {% if recent_bu %}
+    <div class="space-y-4">
+        <h4 class="text-[11px] font-mono uppercase tracking-widest text-british-500 border-b border-sand-200 pb-2">Dernières Dégustations</h4>
+        <div class="paper-card overflow-hidden">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-sand-100 text-[10px] font-mono uppercase tracking-widest">
+                    <tr>
+                        <th class="px-4 py-2 font-semibold">Date</th>
+                        <th class="px-4 py-2 font-semibold">Vin</th>
+                        <th class="px-4 py-2 font-semibold text-right">Note</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-sand-200">
+                    {% for item in recent_bu %}
+                    <tr class="hover:bg-paper transition">
+                        <td class="px-4 py-3 font-mono text-[11px] text-muted">{{ item.date }}</td>
+                        <td class="px-4 py-3">
+                            <span class="font-semibold text-british-900 block">{{ item.domaine }}</span>
+                            <span class="text-[11px] text-muted">{{ item.vin }} — {{ item.millesime }}</span>
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            <span class="text-british-500">
+                                {{"★" * item.rating}}{{"☆" * (5 - item.rating)}}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+    {% endif %}
+
 </div>
 {% endblock %}

@@ -1,64 +1,88 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="space-y-4">
-    <div>
-        <h2 class="font-serif text-2xl font-bold text-gradient">Réglages</h2>
-        <p class="text-xs text-gray-400">Gestion des lieux de stockage, régions et domaines</p>
+<div class="space-y-10 max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="border-b border-sand-200 pb-6">
+        <h2 class="serif-title text-3xl font-bold italic text-british-900 leading-none">Réglages</h2>
+        <p class="text-xs font-mono uppercase tracking-widest text-muted mt-1">Configuration du registre</p>
     </div>
 
-    <div class="glass-card p-4.5 rounded-2xl space-y-3 border border-wine-200/10">
-        <h3 class="font-bold text-xs text-gold-300 uppercase tracking-wider">📍 Emplacements de cave</h3>
-        <form action="{{ url_for('settings') }}" method="POST" class="space-y-2">
+    <!-- Emplacements -->
+    <div class="paper-card p-8 rounded-sm space-y-6">
+        <div class="flex items-center space-x-2 border-b border-sand-200 pb-3">
+            <span class="text-xl">📍</span>
+            <h3 class="serif-title text-xl font-bold italic text-british-900">Lieux de stockage</h3>
+        </div>
+        <form action="{{ url_for('settings') }}" method="POST" class="space-y-4">
             <input type="hidden" name="action" value="update_locations">
-            {% for loc in locations %}
-            <input type="text" name="locations" value="{{ loc }}" class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2.5 text-xs text-white font-bold">
-            {% endfor %}
-            <button type="submit" class="w-full bg-gold-500/20 text-gold-300 border border-gold-500/30 py-2.5 rounded-xl font-bold text-xs">
-                Mettre à jour les emplacements
+            <div class="space-y-2">
+                {% for loc in locations %}
+                <div class="flex items-center space-x-2">
+                    <span class="text-[10px] font-mono text-muted">#{{ loop.index }}</span>
+                    <input type="text" name="locations" value="{{ loc }}" class="flex-1 bg-paper border border-sand-200 rounded-sm px-3 py-2 text-sm font-mono focus:border-british-500">
+                </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="w-full bg-british-500 text-white py-3 rounded-sm font-bold text-xs uppercase tracking-widest hover:bg-british-700 transition">
+                Enregistrer les emplacements
             </button>
         </form>
     </div>
 
-    <div class="glass-card p-4.5 rounded-2xl space-y-3 border border-wine-200/10">
-        <h3 class="font-bold text-xs text-gold-300 uppercase tracking-wider">🌍 Régions viticoles</h3>
-        <form action="{{ url_for('settings') }}" method="POST" class="flex space-x-2">
-            <input type="hidden" name="action" value="add_region">
-            <input type="text" name="new_region" placeholder="Nouvelle région..." class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2 text-xs text-white" required>
-            <button type="submit" class="bg-gold-500 text-wine-950 px-3 py-2 rounded-xl font-bold text-xs">Ajouter</button>
-        </form>
-        <div class="flex flex-wrap gap-1.5 pt-1">
-            {% for r in regions %}
-            <span class="inline-flex items-center text-[11px] bg-wine-900/60 text-gray-200 px-2.5 py-1 rounded-lg border border-wine-500/20">
-                {{ r }}
-                <form action="{{ url_for('settings') }}" method="POST" class="inline ml-1.5">
-                    <input type="hidden" name="action" value="delete_region">
-                    <input type="hidden" name="region_name" value="{{ r }}">
-                    <button type="submit" class="text-red-400 font-bold">×</button>
-                </form>
-            </span>
-            {% endfor %}
+    <!-- Régions & Domaines -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Régions -->
+        <div class="paper-card p-6 rounded-sm space-y-6">
+            <h3 class="serif-title text-lg font-bold italic text-british-900 border-b border-sand-200 pb-3">Régions</h3>
+            <form action="{{ url_for('settings') }}" method="POST" class="flex gap-2">
+                <input type="hidden" name="action" value="add_region">
+                <input type="text" name="new_region" placeholder="Nouvelle..." class="flex-1 bg-paper border border-sand-200 rounded-sm px-3 py-2 text-xs focus:border-british-500" required>
+                <button type="submit" class="bg-british-500 text-white px-3 py-2 rounded-sm font-bold text-xs">Add</button>
+            </form>
+            <div class="flex flex-wrap gap-2">
+                {% for r in regions %}
+                <div class="group flex items-center bg-sand-100 border border-sand-200 px-2 py-1 rounded-sm text-[10px] font-mono text-british-900">
+                    {{ r }}
+                    <form action="{{ url_for('settings') }}" method="POST" class="ml-2">
+                        <input type="hidden" name="action" value="delete_region">
+                        <input type="hidden" name="region_name" value="{{ r }}">
+                        <button type="submit" class="text-red-400 hover:text-red-700">✕</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Domaines -->
+        <div class="paper-card p-6 rounded-sm space-y-6">
+            <h3 class="serif-title text-lg font-bold italic text-british-900 border-b border-sand-200 pb-3">Domaines</h3>
+            <form action="{{ url_for('settings') }}" method="POST" class="flex gap-2">
+                <input type="hidden" name="action" value="add_domaine">
+                <input type="text" name="new_domaine" placeholder="Nouveau..." class="flex-1 bg-paper border border-sand-200 rounded-sm px-3 py-2 text-xs focus:border-british-500" required>
+                <button type="submit" class="bg-british-500 text-white px-3 py-2 rounded-sm font-bold text-xs">Add</button>
+            </form>
+            <div class="flex flex-wrap gap-2">
+                {% for d in domaines %}
+                <div class="group flex items-center bg-sand-100 border border-sand-200 px-2 py-1 rounded-sm text-[10px] font-mono text-british-900">
+                    {{ d }}
+                    <form action="{{ url_for('settings') }}" method="POST" class="ml-2">
+                        <input type="hidden" name="action" value="delete_domaine">
+                        <input type="hidden" name="domaine_name" value="{{ d }}">
+                        <button type="submit" class="text-red-400 hover:text-red-700">✕</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 
-    <div class="glass-card p-4.5 rounded-2xl space-y-3 border border-wine-200/10">
-        <h3 class="font-bold text-xs text-gold-300 uppercase tracking-wider">🏛️ Domaines / Châteaux</h3>
-        <form action="{{ url_for('settings') }}" method="POST" class="flex space-x-2">
-            <input type="hidden" name="action" value="add_domaine">
-            <input type="text" name="new_domaine" placeholder="Nouveau domaine..." class="w-full bg-wine-900/80 border border-wine-200/20 rounded-xl p-2 text-xs text-white" required>
-            <button type="submit" class="bg-gold-500 text-wine-950 px-3 py-2 rounded-xl font-bold text-xs">Ajouter</button>
-        </form>
-        <div class="flex flex-wrap gap-1.5 pt-1">
-            {% for d in domaines %}
-            <span class="inline-flex items-center text-[11px] bg-wine-900/60 text-gray-200 px-2.5 py-1 rounded-lg border border-wine-500/20">
-                {{ d }}
-                <form action="{{ url_for('settings') }}" method="POST" class="inline ml-1.5">
-                    <input type="hidden" name="action" value="delete_domaine">
-                    <input type="hidden" name="domaine_name" value="{{ d }}">
-                    <button type="submit" class="text-red-400 font-bold">×</button>
-                </form>
-            </span>
-            {% endfor %}
+    <!-- Navigation Import/Export -->
+    <div class="paper-card p-6 rounded-sm border-dashed border-british-100 bg-british-50/20 flex justify-between items-center">
+        <div>
+            <h3 class="serif-title text-lg font-bold italic text-british-900">Données externes</h3>
+            <p class="text-xs text-muted font-mono uppercase tracking-tight">Importation & Exportation Excel</p>
         </div>
+        <a href="{{ url_for('import_export') }}" class="bg-white border border-british-500 text-british-500 px-4 py-2 rounded-sm text-xs font-bold hover:bg-british-500 hover:text-white transition">Gérer</a>
     </div>
 </div>
 {% endblock %}
