@@ -55,7 +55,6 @@ rsync -av --delete "$SRC_DIR/" "$DEST_DIR/" \
     --exclude "data_cave.csv" \
     --exclude "*.json" \
     --exclude "deploy.sh" \
-
     --exclude "monchai.service" \
     --exclude ".claude/" \
     --exclude ".continue/" \
