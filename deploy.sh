@@ -2,38 +2,52 @@
 
 # ==============================================================================
 
-# Script de Déploiement par Copie - Mon Chai
+
+# Script de Déploiement par Copie - Mon Chai (Version Robuste)
 # ==============================================================================
 
 # CONFIGURATION
 
 
-SRC_DIR="$(cd "$(dirname "$0")" && pwd)" # Dossier actuel (ton /home/...)
-DEST_DIR="/var/www/monchai"              # Dossier de destination final
+
+
+SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
+DEST_DIR="/var/www/monchai"
 SERVICE_NAME="monchai.service"
 VENV_DIR="venv"
 
 echo "---------------------------------------------------"
 
-echo "🚀 Déploiement de $SRC_DIR vers $DEST_DIR"
+
+echo "🚀 Déploiement : $SRC_DIR -> $DEST_DIR"
 echo "---------------------------------------------------"
 
-
-
-# 1. Créer le dossier de destination s'il n'existe pas
-if [ ! -d "$DEST_DIR" ]; then
-    echo "📂 Création du dossier de destination..."
-    sudo mkdir -p "$DEST_DIR"
-    sudo chown $USER:www-data "$DEST_DIR"
+# 0. Vérification et installation de rsync si nécessaire
+if ! command -v rsync &> /dev/null; then
+    echo "📦 rsync non trouvé. Tentative d'installation..."
+    sudo apt-get update && sudo apt-get install -y rsync || { echo "❌ Échec de l'installation de rsync"; exit 1; }
 fi
 
 
 
+# 1. Créer le dossier de destination et gérer les droits
+if [ ! -d "$DEST_DIR" ]; then
+    echo "📂 Création du dossier de destination..."
+    sudo mkdir -p "$DEST_DIR"
+
+fi
+sudo chown $USER:www-data "$DEST_DIR"
+sudo chmod 775 "$DEST_DIR"
+
+
+
 # 2. Synchronisation des fichiers
-# --exclude : on n'écrase SURTOUT PAS la base de données réelle (.csv et .json)
-# --exclude venv : on ne copie pas l'environnement virtuel, on le gère sur place
-echo "📦 Copie des fichiers (rsync)..."
-rsync -av --progress "$SRC_DIR/" "$DEST_DIR/" \
+
+
+
+
+echo "📦 Synchronisation des fichiers..."
+rsync -av --delete "$SRC_DIR/" "$DEST_DIR/" \
     --exclude ".git/" \
     --exclude ".venv/" \
     --exclude "venv/" \
@@ -41,13 +55,19 @@ rsync -av --progress "$SRC_DIR/" "$DEST_DIR/" \
     --exclude "data_cave.csv" \
     --exclude "*.json" \
     --exclude "deploy.sh" \
-    --exclude "monchai.service"
+
+    --exclude "monchai.service" \
+    --exclude ".claude/" \
+    --exclude ".continue/" \
+    --exclude ".gemini/" \
+    --exclude ".dsh/"
+
+# 3. Installation des dépendances dans le dossier de destination
+cd "$DEST_DIR" || { echo "❌ Impossible d'accéder à $DEST_DIR"; exit 1; }
 
 
 
 
-# 3. Aller dans le dossier final pour la suite
-cd "$DEST_DIR" || exit 1
 
 
 
@@ -57,32 +77,60 @@ cd "$DEST_DIR" || exit 1
 
 
 
-# 4. Gestion de l'environnement virtuel sur place
+
+
 if [ ! -d "$VENV_DIR" ]; then
-    echo "⚠️  Création de l'environnement virtuel dans $DEST_DIR..."
+
+    echo "⚠️  Création de l'environnement virtuel..."
     python3 -m venv "$VENV_DIR"
-
-
-
 fi
 
 
 
-
-
-echo "📦 Mise à jour des dépendances..."
-source "$VENV_DIR/bin/activate"
-pip install --upgrade pip
-pip install -r requirements.txt
-
-# 5. Sécurité : S'assurer que les fichiers de données existent dans le dossier final
-if [ ! -f "data_cave.csv" ]; then
-    echo "📝 Initialisation d'une nouvelle base de données vide..."
-    touch data_cave.csv
+echo "📦 Mise à jour des dépendances Python..."
+"$VENV_DIR/bin/pip" install --upgrade pip
+if [ -f "requirements.txt" ]; then
+    "$VENV_DIR/bin/pip" install -r requirements.txt
+else
+    echo "⚠️  Attention : requirements.txt introuvable dans $DEST_DIR"
 fi
+
+# 4. Initialisation/Permissions des données
+echo "🔐 Configuration des accès aux données..."
+[ ! -f "data_cave.csv" ] && touch data_cave.csv
+sudo chown $USER:www-data data_cave.csv
 chmod 664 data_cave.csv
 
-ls *.json >/dev/null 2>&1 && chmod 664 *.json
+# Gestion des fichiers JSON
+for f in *.json; do
+    if [ -e "$f" ]; then
+        sudo chown $USER:www-data "$f"
+        chmod 664 "$f"
+    fi
+done
+
+
+
+
+
+
+
+
+
+
+
+
+# 5. Redémarrage du service
+echo "🔄 Redémarrage du service $SERVICE_NAME..."
+# On vérifie si le fichier service est installé, sinon on le copie
+if [ ! -f "/etc/systemd/system/$SERVICE_NAME" ]; then
+    echo "📝 Installation du fichier service systemd..."
+    sudo cp "$SRC_DIR/$SERVICE_NAME" "/etc/systemd/system/"
+    # Remplacement dynamique de l'utilisateur dans le fichier service
+    sudo sed -i "s/User=votre_utilisateur/User=$USER/" "/etc/systemd/system/$SERVICE_NAME"
+    sudo systemctl daemon-reload
+    sudo systemctl enable "$SERVICE_NAME"
+fi
 
 
 
@@ -100,20 +148,32 @@ ls *.json >/dev/null 2>&1 && chmod 664 *.json
 
 
 
-# 6. Redémarrage du service
-echo "🔄 Redémarrage du serveur..."
+
+
+
+
+
 sudo systemctl restart "$SERVICE_NAME"
 
-# 7. Vérification
-sleep 1
+
+
+# 6. Verdict
+sleep 2
 if systemctl is-active --quiet "$SERVICE_NAME"; then
     echo "---------------------------------------------------"
-    echo "✅ DÉPLOIEMENT RÉUSSI !"
-    echo "Le site est à jour dans $DEST_DIR"
+
+
+    echo "✅ DÉPLOIEMENT TERMINÉ AVEC SUCCÈS !"
+    echo "Site accessible sur le port configuré."
     echo "---------------------------------------------------"
 else
 
 
 
-    echo "❌ ERREUR : Le service n'a pas redémarré. Vérifie 'sudo journalctl -u $SERVICE_NAME'"
+
+    echo "❌ LE SERVICE N'A PAS DÉMARRÉ."
+    echo "Logs d'erreur :"
+    sudo journalctl -u "$SERVICE_NAME" -n 20 --no-pager
+    exit 1
 fi
+
