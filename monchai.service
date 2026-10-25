@@ -1,0 +1,21 @@
+[Unit]
+Description=Serveur Gunicorn pour Mon Chai (Registre de Cave)
+After=network.target
+
+[Service]
+# REMPLACER 'votre_utilisateur' par votre nom d'utilisateur Debian (ex: debian, www-data, etc.)
+User=votre_utilisateur
+Group=www-data
+
+# REMPLACER par le chemin absolu de votre application
+WorkingDirectory=/var/www/monchai
+Environment="PATH=/var/www/monchai/venv/bin"
+
+# Commande de lancement (3 workers, port 8501)
+ExecStart=/var/www/monchai/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8501 app:app
+
+# Redémarrage automatique en cas de crash
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
