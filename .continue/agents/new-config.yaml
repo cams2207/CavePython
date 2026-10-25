@@ -1,0 +1,27 @@
+name: OmniRoute
+version: 1.0.0
+schema: v1
+models:
+  - name: "OmniRoute Free Stack"
+    provider: openai
+    model: "free-stack"
+    apiBase: "http://localhost:20128/v1"
+    apiKey: "Plrtspa@92356"
+
+  # - name: "Groq GPT OSS 120B"
+  #   provider: openai
+  #   model: "groq/openai/gpt-oss-120b"
+  #   apiBase: "http://localhost:20128/v1"
+  #   apiKey: "Plrtspa@92356"
+
+  # - name: "Pollinations — g4fpol/openai"
+  #   provider: openai
+  #   model: "g4fpol/openai"
+  #   apiBase: "http://localhost:20128/v1"
+  #   apiKey: "Plrtspa@92356"
+
+  # - name: "Gemini 3.8 Flash (Gratuit API Key)"
+  #   provider: openai
+  #   model: "gemini/gemini-3.8-flash"
+  #   apiBase: "http://localhost:20128/v1"
+  #   apiKey: "Plrtspa@92356"
