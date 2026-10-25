@@ -120,39 +120,24 @@ done
 
 
 # 5. Redémarrage du service
+echo "🔄 Configuration du service systemd..."
+
+# On écrase le fichier service pour être sûr qu'il est à jour
+sudo cp "$SRC_DIR/$SERVICE_NAME" "/etc/systemd/system/"
+
+# Remplacement dynamique de l'utilisateur et du chemin
+# On utilise $USER (l'utilisateur actuel) et $DEST_DIR
+sudo sed -i "s|User=votre_utilisateur|User=$USER|" "/etc/systemd/system/$SERVICE_NAME"
+sudo sed -i "s|WorkingDirectory=/var/www/monchai|WorkingDirectory=$DEST_DIR|" "/etc/systemd/system/$SERVICE_NAME"
+sudo sed -i "s|Environment=\"PATH=/var/www/monchai/venv/bin\"|Environment=\"PATH=$DEST_DIR/venv/bin\"|" "/etc/systemd/system/$SERVICE_NAME"
+sudo sed -i "s|ExecStart=/var/www/monchai/venv/bin/gunicorn|ExecStart=$DEST_DIR/venv/bin/gunicorn|" "/etc/systemd/system/$SERVICE_NAME"
+
+sudo systemctl daemon-reload
+sudo systemctl enable "$SERVICE_NAME"
+
 echo "🔄 Redémarrage du service $SERVICE_NAME..."
-# On vérifie si le fichier service est installé, sinon on le copie
-if [ ! -f "/etc/systemd/system/$SERVICE_NAME" ]; then
-    echo "📝 Installation du fichier service systemd..."
-    sudo cp "$SRC_DIR/$SERVICE_NAME" "/etc/systemd/system/"
-    # Remplacement dynamique de l'utilisateur dans le fichier service
-    sudo sed -i "s/User=votre_utilisateur/User=$USER/" "/etc/systemd/system/$SERVICE_NAME"
-    sudo systemctl daemon-reload
-    sudo systemctl enable "$SERVICE_NAME"
-fi
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 sudo systemctl restart "$SERVICE_NAME"
+
 
 
 
